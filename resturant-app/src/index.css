@@ -127,3 +127,9 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .font-arabic-serif {
+    font-family: "Noto Serif Arabic", serif;
+  }
+}

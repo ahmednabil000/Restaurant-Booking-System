@@ -20,8 +20,8 @@ function Testimonial({
       </div>
 
       {/* Comment */}
-      <div className="flex-1 mb-6">
-        <p className="text-gray-700 text-base md:text-lg leading-relaxed italic text-center line-clamp-4">
+      <div className="flex-1 mb-6 min-h-[5.5rem] max-h-[5.5rem]">
+        <p className="text-gray-700 text-lg md:text-xl lg:text-2xl leading-relaxed italic text-center line-clamp-4">
           "{comment}"
         </p>
       </div>
@@ -54,10 +54,10 @@ function Testimonial({
           </div>
         </div>
         <div>
-          <h4 className="font-bold text-gray-900 text-base md:text-lg">
+          <h4 className="font-bold text-gray-900 text-base md:text-lg lg:text-xl">
             {name}
           </h4>
-          <p className="text-sm text-gray-500">عميل مميز</p>
+          <p className="text-base text-gray-500">عميل مميز</p>
         </div>
       </div>
     </div>

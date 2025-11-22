@@ -18,7 +18,7 @@ const Hero = () => {
           <span className="text-white text-base sm:text-lg md:text-xl lg:text-2xl xl:text-[2.4rem] font-medium text-center max-w-4xl leading-relaxed px-4">
             تجربة طعام فاخرة لا تُنسى في قلب المدينة.
           </span>
-          <button className="text-white cursor-pointer text-center bg-[#e26136] px-4 py-3 sm:px-6 sm:py-4 md:px-7 md:py-5 lg:px-8 lg:py-7 text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl rounded-lg hover:bg-[#cd4f25] transition-colors duration-200 mt-2 sm:mt-4">
+          <button className="text-white cursor-pointer text-center bg-[#e26136] px-4 py-3 sm:px-6 sm:py-4 md:px-7 md:py-5 lg:px-8 lg:py-7 text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl rounded-lg hover:bg-[#cd4f25] transition-colors duration-200 mt-2 sm:mt-4">
             احجز طاولتك
           </button>
         </div>
