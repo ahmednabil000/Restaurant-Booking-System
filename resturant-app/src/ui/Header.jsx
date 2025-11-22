@@ -49,9 +49,12 @@ const Header = () => {
           >
             دخول
           </Link>
-          <button className="text-white cursor-pointer bg-[#e26136] px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 lg:px-6 lg:py-3 text-base sm:text-lg md:text-xl lg:text-2xl rounded-lg hover:bg-[#cd4f25] transition-colors duration-200 shadow-sm hover:shadow-md">
+          <Link
+            to={"/reserve"}
+            className="text-white cursor-pointer bg-[#e26136] px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 lg:px-6 lg:py-3 text-base sm:text-lg md:text-xl lg:text-2xl rounded-lg hover:bg-[#cd4f25] transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
             احجز طاولة
-          </button>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}

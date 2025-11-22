@@ -11,6 +11,7 @@ import Menu from "./pages/Menu.jsx";
 import Login from "./pages/Login.jsx";
 import ContactUs from "./pages/Contact-Us/ContactUs.jsx";
 import "leaflet/dist/leaflet.css";
+import TableBooking from "./pages/Reservation/TableBooking.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
       { path: "about-us", element: <AboutUs /> },
       { path: "menu", element: <Menu /> },
       { path: "contact-us", element: <ContactUs /> },
+      { path: "reserve", element: <TableBooking /> },
     ],
   },
   {
