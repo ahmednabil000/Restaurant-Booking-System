@@ -11,6 +11,10 @@ const Tag = sequelize.define("Tag", {
     allowNull: false,
     unique: true,
   },
+  titleColor: {
+    type: DataTypes.STRING,
+    defaultValue: "#fff",
+  },
   bgColor: {
     type: DataTypes.STRING,
     defaultValue: "#007bff",

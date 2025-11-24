@@ -50,11 +50,6 @@ const MenuPage = () => {
     return results;
   }, [searchTerm, selectedCategory, selectedFilters]);
 
-  const handleAddToCart = (item) => {
-    console.log("Added to cart:", item);
-    // You can dispatch an action or update cart state here
-  };
-
   const handleToggleFavorite = (itemId, isFavorite) => {
     console.log(`Item ${itemId} favorite status: ${isFavorite}`);
     // Update favorite state in context/redux if needed
@@ -65,10 +60,10 @@ const MenuPage = () => {
       <div className="h-[40rem] w-full relative">
         <img src={menuPageImg} className="object-cover w-full h-full" />
         <div className="bg-black/30 w-full h-full absolute top-0 "></div>
-        <p className="absolute top-[50%] left-[50%] text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl translate-[-50%] text-white font-bold">
+        <p className="absolute top-[50%] left-[50%] text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl translate-[-50%] text-white font-bold">
           قائمة طعامنا الشهية
           <br></br>
-          <span className="font-medium text-lg sm:text-xl md:text-2xl lg:text-3xl">
+          <span className="font-medium text-base sm:text-lg md:text-xl lg:text-2xl">
             استكشف مجموعتنا الواسعة من الأطباق التقليدية والعالمية، المحضرة
             بعناية من أجود المكونات الطازجة.
           </span>
@@ -85,7 +80,7 @@ const MenuPage = () => {
               placeholder="ابحث عن طبقك المفضل..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 sm:py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg sm:text-xl"
+              className="w-full pl-10 pr-4 py-3 sm:py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base sm:text-lg"
             />
           </div>
         </div>
@@ -96,7 +91,7 @@ const MenuPage = () => {
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full font-medium transition-colors text-lg sm:text-xl ${
+              className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-full font-medium transition-colors text-base sm:text-lg ${
                 selectedCategory === category.id
                   ? "bg-orange-500 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
@@ -120,12 +115,11 @@ const MenuPage = () => {
               <MealCard
                 key={item.id}
                 item={item}
-                onAddToCart={handleAddToCart}
                 onToggleFavorite={handleToggleFavorite}
               />
             ))
           ) : (
-            <div className="col-span-full text-center py-12 text-gray-500 text-xl sm:text-2xl">
+            <div className="col-span-full text-center py-12 text-gray-500 text-lg sm:text-xl">
               لا يوجد أطباق مطابقة لبحثك.
             </div>
           )}

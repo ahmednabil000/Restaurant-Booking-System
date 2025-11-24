@@ -1,8 +1,9 @@
 // src/components/MealCard.jsx
 import React from "react";
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa";
+import AddToCartButton from "../../components/AddToCartButton";
 
-const LongMealCard = ({ item, onAddToCart, onToggleFavorite }) => {
+const LongMealCard = ({ item, onToggleFavorite }) => {
   const [isFavorite, setIsFavorite] = React.useState(false);
 
   const handleFavorite = () => {
@@ -30,15 +31,15 @@ const LongMealCard = ({ item, onAddToCart, onToggleFavorite }) => {
 
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 flex-1 mr-2">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex-1 mr-2">
             {item.name}
           </h3>
-          <span className="text-orange-600 font-bold text-xl sm:text-2xl whitespace-nowrap">
+          <span className="text-orange-600 font-bold text-lg sm:text-xl whitespace-nowrap">
             {item.price.toFixed(2)} ج.م
           </span>
         </div>
 
-        <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-4 min-h-16 line-clamp-2 leading-relaxed">
+        <p className="text-gray-600 text-sm sm:text-base md:text-lg mb-4 min-h-16 line-clamp-2 leading-relaxed">
           {item.description}
         </p>
 
@@ -47,7 +48,7 @@ const LongMealCard = ({ item, onAddToCart, onToggleFavorite }) => {
           {item.tags.map((tag, index) => (
             <span
               key={index}
-              className={`px-2 py-1 text-base sm:text-lg rounded-full ${
+              className={`px-2 py-1 text-xs sm:text-sm rounded-full ${
                 tag === "نباتي"
                   ? "bg-green-100 text-green-800"
                   : tag === "حار"
@@ -65,13 +66,10 @@ const LongMealCard = ({ item, onAddToCart, onToggleFavorite }) => {
         </div>
 
         {/* Add to Cart Button */}
-        <button
-          onClick={() => onAddToCart?.(item)}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 sm:py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-lg sm:text-xl"
-        >
-          <FaShoppingCart size={16} />
-          أضف إلى السلة
-        </button>
+        <AddToCartButton
+          item={item}
+          className="w-full font-medium py-2 sm:py-3 px-4 text-base sm:text-lg"
+        />
       </div>
     </div>
   );

@@ -13,8 +13,8 @@ const TextInput = ({
   const isTextarea = rows > 1;
 
   return (
-    <div className={`mb-6 ${className}`}>
-      <label className="block text-lg font-medium text-gray-700 mb-3" dir="rtl">
+    <div className={`mb-5 ${className}`}>
+      <label className="block text-sm font-medium text-gray-700 mb-2" dir="rtl">
         {label}
       </label>
       {isTextarea ? (
@@ -25,7 +25,7 @@ const TextInput = ({
           placeholder={placeholder}
           required={required}
           rows={rows}
-          className={`w-full px-5 py-4 text-lg border ${
+          className={`w-full px-4 py-3 text-base border ${
             error ? "border-red-500" : "border-gray-300"
           } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none`}
         />
@@ -37,13 +37,13 @@ const TextInput = ({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full px-5 py-4 text-lg border ${
+          className={`w-full px-4 py-3 text-base border ${
             error ? "border-red-500" : "border-gray-300"
           } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent`}
         />
       )}
       {error && (
-        <p className="mt-3 text-lg text-red-600 font-medium">{error}</p>
+        <p className="mt-2 text-sm text-red-600 font-medium">{error}</p>
       )}
     </div>
   );

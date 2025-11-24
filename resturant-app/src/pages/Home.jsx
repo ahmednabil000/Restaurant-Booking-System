@@ -18,15 +18,15 @@ const Home = () => {
       <Container>
         <Seperator />
         <Seperator />
-        <div className="flex justify-center items-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-center px-4">
+        <div className="flex justify-center items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-center px-4">
           اطباقنا المميزة
         </div>
         <Seperator />
         <MealsCollection />
         <Seperator />
-        <div className="bg-linear-to-br from-slate-50 to-slate-100 w-full py-8 sm:py-12 md:py-16 lg:py-20">
+        <div className="bg-linear-to-br from-slate-50 to-slate-100 w-full py-6 sm:py-8 md:py-10 lg:py-12">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
-            <p className="text-black font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-center mb-8 sm:mb-12 md:mb-16">
+            <p className="text-black font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-center mb-6 sm:mb-8 md:mb-10">
               ماذا يقول عملاؤنا
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-6 xl:gap-8 max-w-7xl mx-auto">
@@ -55,7 +55,7 @@ const Home = () => {
         </div>
         <Seperator />
         <Seperator />
-        <p className="text-black font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-center px-4">
+        <p className="text-black font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-center px-4">
           اكتشف المزيد
         </p>
         <Seperator />
@@ -64,25 +64,25 @@ const Home = () => {
             title="من نحن"
             content="اكتشف قصتنا الملهمة وشغفنا بالطعام."
           >
-            <IoMdInformationCircleOutline className="text-[#e26136] w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16" />
+            <IoMdInformationCircleOutline className="text-[#e26136] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
           </InformationCard>
           <InformationCard
             title="احجز طاولة"
             content="خطط لزيارتك القادمة واحجز طاولتك بسهولة."
           >
-            <CiCalendar className="text-[#e26136] w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16" />
+            <CiCalendar className="text-[#e26136] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
           </InformationCard>
           <InformationCard
             title="القائمة"
             content="تصفح مجموعتنا الواسعة من الأطباق الشهية."
           >
-            <IoMdMenu className="text-[#e26136] w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16" />
+            <IoMdMenu className="text-[#e26136] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
           </InformationCard>
           <InformationCard
             title="تواصل معنا"
             content="نحن هنا للإجابة على جميع استفساراتك."
           >
-            <MdOutlinePhone className="text-[#e26136] w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16" />
+            <MdOutlinePhone className="text-[#e26136] w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
           </InformationCard>
         </div>
         <Seperator />

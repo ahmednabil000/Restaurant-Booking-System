@@ -8,8 +8,9 @@ import ContactInfo from "./ContactInfo";
 const ContactUs = () => {
   return (
     <div>
+      <Seperator />
       <Container>
-        <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-black font-bold text-center mb-4">
+        <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-black font-bold text-center mb-16">
           تواصل معنا
         </p>
 
@@ -18,7 +19,9 @@ const ContactUs = () => {
           النموذج أو المعلومات المباشرة.
         </p>
         <div className="grid gap-6 md:gap-8 lg:gap-10 grid-cols-1 lg:grid-cols-2">
-          <ResturantMap />
+          <div>
+            <ResturantMap />
+          </div>
           <div className="flex flex-col gap-5">
             <p className="text-xl sm:text-2xl md:text-3xl text-black font-bold text-end mb-4">
               أرسل لنا رسالة
