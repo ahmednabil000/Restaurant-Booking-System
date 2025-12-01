@@ -15,6 +15,7 @@ import Cart from "./pages/Cart.jsx";
 import QueryProvider from "./providers/QueryProvider.jsx";
 import "leaflet/dist/leaflet.css";
 import TableBooking from "./pages/Reservation/TableBooking.jsx";
+import Overview from "./pages/dashboard/Overview.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
   {
     path: "login/error",
     element: <LoginError />,
+  },
+  {
+    path: "dashboard/overview",
+    element: <Overview />,
   },
 ]);
 

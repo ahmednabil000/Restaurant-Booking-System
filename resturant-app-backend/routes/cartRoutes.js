@@ -21,4 +21,7 @@ router.put(
   cartController.updateItemQuantity
 );
 
+// Clear all items from cart
+router.delete("/cart/clear", cartController.clearCart);
+
 module.exports = router;

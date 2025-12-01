@@ -4,7 +4,30 @@ const authMiddleware = require("../middlewares/auth");
 const router = express.Router();
 
 router.get("/meals", mealsController.getMeals);
+router.get("/meals/search", mealsController.searchMeals);
 router.get("/meals/:id", mealsController.getMealById);
+
+// Admin routes for meal management
+router.post(
+  "/meals",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  mealsController.addMeal
+);
+
+router.put(
+  "/meals/:id",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  mealsController.updateMealById
+);
+
+router.delete(
+  "/meals/:id",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  mealsController.removeMealById
+);
 
 // Example route using session-based auth (legacy)
 router.get("/test", authMiddleware.isAuthenticated, (req, res) => {

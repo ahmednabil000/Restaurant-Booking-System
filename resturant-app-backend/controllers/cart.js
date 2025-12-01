@@ -8,8 +8,9 @@ exports.addToCart = async (req, res) => {
   try {
     const { mealId, quantity = 1, specialInstructions } = req.body;
     const user = req.user;
-
+    console.log("here");
     // Validate input
+    console.log(mealId, quantity);
     if (!mealId) {
       return res.status(400).json({
         success: false,
@@ -47,7 +48,7 @@ exports.addToCart = async (req, res) => {
         status: "active",
       },
     });
-
+    console.log(meal.imageUrl);
     if (!cart) {
       cart = await Cart.create({
         id: uuidv4(),
@@ -82,6 +83,7 @@ exports.addToCart = async (req, res) => {
         quantity: quantity,
         unitPrice: meal.price,
         totalPrice: quantity * meal.price,
+        imageUrl: meal.imageUrl,
         specialInstructions: specialInstructions || null,
       });
     }
@@ -149,6 +151,7 @@ exports.getCart = async (req, res) => {
                 "category",
                 "type",
                 "isAvailable",
+                "imageUrl",
               ],
             },
           ],
@@ -325,6 +328,55 @@ exports.updateItemQuantity = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating cart item quantity:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.clearCart = async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Find user's active cart
+    const cart = await Cart.findOne({
+      where: {
+        userId: user.id,
+        status: "active",
+      },
+    });
+
+    if (!cart) {
+      return res.status(200).json({
+        success: true,
+        message: "Cart is already empty",
+      });
+    }
+
+    // Delete all cart items
+    await CartItem.destroy({
+      where: {
+        cartId: cart.id,
+      },
+    });
+
+    // Update cart total amount
+    cart.totalAmount = 0;
+    await cart.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Cart cleared successfully",
+      cart: {
+        id: cart.id,
+        totalAmount: 0,
+        itemCount: 0,
+        items: [],
+      },
+    });
+  } catch (error) {
+    console.error("Error clearing cart:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

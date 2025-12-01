@@ -13,7 +13,7 @@ const Reservation = sequelize.define("Reservation", {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   phone: {
     type: DataTypes.STRING,
@@ -65,6 +65,14 @@ const Reservation = sequelize.define("Reservation", {
       model: "Carts",
       key: "id",
     },
+  },
+  rate: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  confirmationToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 

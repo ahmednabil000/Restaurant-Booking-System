@@ -36,6 +36,10 @@ const CartItem = sequelize.define("CartItem", {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
+  imageUrl: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   specialInstructions: {
     type: DataTypes.TEXT,
     allowNull: true,

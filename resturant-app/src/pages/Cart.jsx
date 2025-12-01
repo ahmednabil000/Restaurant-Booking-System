@@ -1,16 +1,21 @@
 import React from "react";
 import { Link } from "react-router";
 import { AiOutlineShoppingCart, AiOutlineArrowRight } from "react-icons/ai";
-import useCartStore from "../store/cartStore";
 import useAuthStore from "../store/authStore";
-import { useCartQuery } from "../hooks/useCart";
+import { useCartQuery, useClearCartMutation } from "../hooks/useCart";
 import CartItem from "../components/CartItem";
 import Container from "../ui/Container";
 
 const Cart = () => {
   const { isAuthenticated } = useAuthStore();
-  const { items, getTotalPrice, clearCart } = useCartStore();
-  const { data: cartData, isLoading, error } = useCartQuery();
+  const { data: cartResponse, isLoading, error } = useCartQuery();
+  const clearCartMutation = useClearCartMutation();
+
+  // Extract cart data from API response
+  const cartData = cartResponse?.success ? cartResponse.cart : null;
+  const cartItems = cartData?.items || [];
+  const totalAmount = parseFloat(cartData?.totalAmount) || 0;
+  const itemCount = parseInt(cartData?.itemCount) || 0;
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -69,7 +74,7 @@ const Cart = () => {
     );
   }
 
-  if (items.length === 0) {
+  if (cartItems.length === 0) {
     return (
       <Container>
         <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
@@ -92,22 +97,20 @@ const Cart = () => {
     );
   }
 
-  const totalPrice = getTotalPrice();
-
   return (
     <Container>
       <div className="py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">سلة التسوق</h1>
-          <p className="text-gray-600">عدد العناصر: {items.length}</p>
+          <p className="text-gray-600">عدد العناصر: {itemCount}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
             <div className="space-y-4">
-              {items.map((item) => (
+              {cartItems.map((item) => (
                 <CartItem key={item.id} item={item} />
               ))}
             </div>
@@ -115,10 +118,31 @@ const Cart = () => {
             {/* Clear Cart Button */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <button
-                onClick={clearCart}
-                className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+                onClick={() => {
+                  if (window.confirm("هل أنت متأكد من إفراغ السلة؟")) {
+                    clearCartMutation.mutate(undefined, {
+                      onSuccess: () => {
+                        // Optional: Show success message or handle success
+                        console.log("تم إفراغ السلة بنجاح");
+                      },
+                      onError: (error) => {
+                        // Show error message
+                        alert(`خطأ في إفراغ السلة: ${error.message}`);
+                      },
+                    });
+                  }
+                }}
+                disabled={clearCartMutation.isLoading}
+                className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                إفراغ السلة
+                {clearCartMutation.isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                    جاري إفراغ السلة...
+                  </>
+                ) : (
+                  "إفراغ السلة"
+                )}
               </button>
             </div>
           </div>
@@ -134,18 +158,18 @@ const Cart = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">المجموع الفرعي</span>
                   <span className="font-semibold">
-                    ${totalPrice.toFixed(2)}
+                    {totalAmount.toFixed(2)} ج.م
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">رسوم التوصيل</span>
-                  <span className="font-semibold">$5.00</span>
+                  <span className="text-gray-600">رسوم الخدمة</span>
+                  <span className="font-semibold">300.00 ج.م</span>
                 </div>
                 <div className="border-t border-gray-300 pt-3">
                   <div className="flex justify-between text-lg font-bold">
                     <span>المجموع الكلي</span>
                     <span className="text-[#e26136]">
-                      ${(totalPrice + 5).toFixed(2)}
+                      {(totalAmount + 5).toFixed(2)}ج.م
                     </span>
                   </div>
                 </div>

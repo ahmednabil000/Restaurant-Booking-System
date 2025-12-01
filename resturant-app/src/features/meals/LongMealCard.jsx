@@ -45,24 +45,46 @@ const LongMealCard = ({ item, onToggleFavorite }) => {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {item.tags.map((tag, index) => (
-            <span
-              key={index}
-              className={`px-2 py-1 text-xs sm:text-sm rounded-full ${
-                tag === "نباتي"
-                  ? "bg-green-100 text-green-800"
-                  : tag === "حار"
-                  ? "bg-red-100 text-red-800"
-                  : tag === "خالي من الغلوتين"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : tag === "الأكثر طلباً"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {tag}
-            </span>
-          ))}
+          {item.tags.map((tag, index) => {
+            // Handle both string tags and object tags
+            const tagName =
+              typeof tag === "string" ? tag : tag.title || tag.name || "";
+            const tagId = typeof tag === "object" && tag.id ? tag.id : index;
+            const bgColor = typeof tag === "object" ? tag.bgColor : null;
+            const titleColor = typeof tag === "object" ? tag.titleColor : null;
+
+            // Use custom colors if available, otherwise use predefined classes
+            const customStyle =
+              bgColor && titleColor
+                ? {
+                    backgroundColor: bgColor,
+                    color: titleColor,
+                  }
+                : {};
+
+            const defaultClasses =
+              bgColor && titleColor
+                ? ""
+                : tagName === "نباتي"
+                ? "bg-green-100 text-green-800"
+                : tagName === "حار"
+                ? "bg-red-100 text-red-800"
+                : tagName === "خالي من الغلوتين"
+                ? "bg-yellow-100 text-yellow-800"
+                : tagName === "الأكثر طلباً"
+                ? "bg-blue-100 text-blue-800"
+                : "bg-gray-100 text-gray-800";
+
+            return (
+              <span
+                key={tagId}
+                style={customStyle}
+                className={`px-2 py-1 text-xs sm:text-sm rounded-full ${defaultClasses}`}
+              >
+                {tagName}
+              </span>
+            );
+          })}
         </div>
 
         {/* Add to Cart Button */}

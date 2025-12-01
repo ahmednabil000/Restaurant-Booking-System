@@ -1,6 +1,5 @@
 // Cart API service functions
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 // Get user's cart
 export const getCart = async () => {
@@ -27,23 +26,42 @@ export const getCart = async () => {
 };
 
 // Add item to cart
-export const addToCart = async (item) => {
+export const addToCart = async (mealId, quantity = 1) => {
   try {
     const token = localStorage.getItem("auth_token");
+
+    if (!token) {
+      throw new Error("المستخدم غير مسجل الدخول");
+    }
+
+    if (!mealId) {
+      throw new Error("معرف الوجبة مطلوب");
+    }
+
     const response = await fetch(`${API_BASE_URL}/cart/add`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(item),
+      body: JSON.stringify({
+        mealId,
+        quantity: quantity || 1,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.text();
+      throw new Error(
+        `خطأ في إضافة الوجبة للسلة: ${response.status} - ${errorData}`
+      );
     }
 
     const data = await response.json();
+
+    // Log the response to understand the structure
+    console.log("Add to cart response:", data);
+
     return data;
   } catch (error) {
     console.error("Error adding to cart:", error);
@@ -99,6 +117,30 @@ export const updateItemQuantity = async (cartItemId, quantity) => {
     return data;
   } catch (error) {
     console.error("Error updating cart item quantity:", error);
+    throw error;
+  }
+};
+
+// Clear all items from cart
+export const clearCart = async () => {
+  try {
+    const token = localStorage.getItem("auth_token");
+    const response = await fetch(`${API_BASE_URL}/cart/clear`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error clearing cart:", error);
     throw error;
   }
 };

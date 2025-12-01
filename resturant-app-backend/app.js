@@ -10,6 +10,15 @@ const cookieSession = require("cookie-session");
 const authRoutes = require("./routes/auth");
 const mealsRoutes = require("./routes/mealsRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
+const resturantRoutes = require("./routes/resturantRoutes");
+const tagsRoutes = require("./routes/tagsRoutes");
+const {
+  createArabicMockData,
+  createRestaurantMockData,
+  createMockMealTagRelationships,
+} = require("./mockData");
+const { updateMealsWithImages } = require("./updateMealImages");
 
 const app = express();
 
@@ -49,8 +58,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(tagsRoutes);
 app.use("/auth", authRoutes);
 app.use(mealsRoutes);
+app.use(reservationRoutes);
+app.use(resturantRoutes);
 app.use(cartRoutes);
 
 app.use((req, res, next) => {
@@ -65,7 +77,7 @@ async function startServer() {
     await db.authenticate();
     console.log("Database authenticated successfully.");
 
-    await db.sync({ alter: true });
+    await db.sync({ alter: true }); // Preserve existing data
     console.log("Database synchronized successfully.");
 
     // Update existing users without fullName
@@ -79,6 +91,15 @@ async function startServer() {
       }
     );
     console.log("Updated existing users with default fullName.");
+
+    // Create Arabic mock data (temporary)
+    await createArabicMockData();
+
+    // Create restaurant mock data
+    await createRestaurantMockData();
+    await createMockMealTagRelationships();
+    // Update existing meals with image URLs
+    await updateMealsWithImages();
 
     app.listen(8080, () => {
       console.log("Server is running on port 8080");

@@ -3,7 +3,8 @@ import {
   getCart,
   addToCart,
   removeFromCart,
-  updateItemQuantity,
+  updateItemQuantity as updateItemQuantityService,
+  clearCart,
 } from "../services/cartService";
 import useCartStore from "../store/cartStore";
 
@@ -42,15 +43,28 @@ export const useAddToCartMutation = () => {
   const { addItem, setError } = useCartStore();
 
   return useMutation({
-    mutationFn: addToCart,
+    mutationFn: ({ mealId, quantity }) => addToCart(mealId, quantity),
     onSuccess: (data) => {
-      // Update local state
-      addItem(data.item);
-      // Invalidate and refetch cart query
-      queryClient.invalidateQueries({ queryKey: cartKeys.lists() });
+      try {
+        // Handle different possible API response structures
+        const item = data.item || data;
+
+        if (item) {
+          // Update local state
+          addItem(item);
+          // Invalidate and refetch cart query
+          queryClient.invalidateQueries({ queryKey: cartKeys.lists() });
+        } else {
+          console.error("Invalid API response structure:", data);
+        }
+      } catch (error) {
+        console.error("Error processing add to cart success:", error);
+        setError("خطأ في معالجة إضافة العنصر للسلة");
+      }
     },
     onError: (error) => {
-      setError(error.message);
+      console.error("Add to cart error:", error);
+      setError(error.message || "خطأ في إضافة العنصر للسلة");
     },
   });
 };
@@ -81,10 +95,29 @@ export const useUpdateCartItemMutation = () => {
 
   return useMutation({
     mutationFn: ({ cartItemId, quantity }) =>
-      updateItemQuantity(cartItemId, quantity),
+      updateItemQuantityService(cartItemId, quantity),
     onSuccess: (data, variables) => {
       // Update local state
       updateItemQuantity(variables.cartItemId, variables.quantity);
+      // Invalidate and refetch cart query
+      queryClient.invalidateQueries({ queryKey: cartKeys.lists() });
+    },
+    onError: (error) => {
+      setError(error.message);
+    },
+  });
+};
+
+// Clear cart mutation
+export const useClearCartMutation = () => {
+  const queryClient = useQueryClient();
+  const { clearCart: clearCartStore, setError } = useCartStore();
+
+  return useMutation({
+    mutationFn: clearCart,
+    onSuccess: () => {
+      // Update local state
+      clearCartStore();
       // Invalidate and refetch cart query
       queryClient.invalidateQueries({ queryKey: cartKeys.lists() });
     },

@@ -11,16 +11,24 @@ const useCartStore = create(
       // Add item to cart
       addItem: (item) => {
         const { items } = get();
-        const existingItem = items.find((cartItem) => cartItem.id === item.id);
+        // Ensure we have a valid item with safe property access
+        if (!item || !item.id) {
+          console.error("Invalid item provided to addItem:", item);
+          return;
+        }
+
+        const existingItem = items.find(
+          (cartItem) => cartItem && cartItem.id === item.id
+        );
 
         if (existingItem) {
           // Update quantity if item already exists
           set({
             items: items.map((cartItem) =>
-              cartItem.id === item.id
+              cartItem && cartItem.id === item.id
                 ? {
                     ...cartItem,
-                    quantity: cartItem.quantity + (item.quantity || 1),
+                    quantity: (cartItem.quantity || 0) + (item.quantity || 1),
                   }
                 : cartItem
             ),
@@ -37,7 +45,7 @@ const useCartStore = create(
       removeItem: (itemId) => {
         const { items } = get();
         set({
-          items: items.filter((item) => item.id !== itemId),
+          items: items.filter((item) => item && item.id !== itemId),
         });
       },
 
@@ -51,7 +59,7 @@ const useCartStore = create(
         const { items } = get();
         set({
           items: items.map((item) =>
-            item.id === itemId ? { ...item, quantity } : item
+            item && item.id === itemId ? { ...item, quantity } : item
           ),
         });
       },
@@ -79,14 +87,14 @@ const useCartStore = create(
       // Get total items count
       getTotalItems: () => {
         const { items } = get();
-        return items.reduce((total, item) => total + item.quantity, 0);
+        return items.reduce((total, item) => total + (item?.quantity || 0), 0);
       },
 
       // Get total price
       getTotalPrice: () => {
         const { items } = get();
         return items.reduce(
-          (total, item) => total + item.price * item.quantity,
+          (total, item) => total + (item?.price || 0) * (item?.quantity || 0),
           0
         );
       },

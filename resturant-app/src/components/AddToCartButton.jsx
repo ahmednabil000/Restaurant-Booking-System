@@ -3,6 +3,10 @@ import { AiOutlinePlus, AiOutlineCheck } from "react-icons/ai";
 import { useAddToCartMutation } from "../hooks/useCart";
 import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "../utils/notifications";
 
 const AddToCartButton = ({ item, quantity = 1, className = "", children }) => {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -16,21 +20,32 @@ const AddToCartButton = ({ item, quantity = 1, className = "", children }) => {
       return;
     }
 
-    const cartItem = {
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-      description: item.description,
-      quantity: quantity,
-    };
-
-    addToCartMutation.mutate(cartItem, {
-      onSuccess: () => {
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 2000);
+    // Call addToCart with mealId and quantity as expected by the API
+    addToCartMutation.mutate(
+      {
+        mealId: item.id,
+        quantity: quantity,
       },
-    });
+      {
+        onSuccess: () => {
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 2000);
+
+          // Show toast notification
+          showSuccessNotification(
+            "تمت إضافة الوجبة للسلة بنجاح!",
+            `تم إضافة ${item.name || item.title} إلى سلة التسوق`
+          );
+        },
+        onError: (error) => {
+          // Show error notification
+          showErrorNotification(
+            "خطأ في إضافة الوجبة",
+            error.message || "حدث خطأ أثناء إضافة الوجبة للسلة"
+          );
+        },
+      }
+    );
   };
 
   const defaultButtonContent = (
@@ -69,7 +84,7 @@ const AddToCartButton = ({ item, quantity = 1, className = "", children }) => {
       onClick={handleAddToCart}
       disabled={addToCartMutation.isLoading || showSuccess}
       className={buttonClasses}
-      aria-label={`Add ${item.name} to cart`}
+      aria-label={`Add ${item.title || item.name} to cart`}
     >
       {children || defaultButtonContent}
       {addToCartMutation.isLoading && (

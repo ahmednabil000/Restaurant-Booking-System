@@ -5,6 +5,9 @@ const Cart = require("./cart");
 const CartItem = require("./cartItem");
 const Reservation = require("./reservation");
 const User = require("./user");
+const Resturant = require("./resturant");
+const WorkingDay = require("./workingDay");
+const Employee = require("./employee");
 
 // Initialize associations after all models are loaded
 function initializeAssociations() {
@@ -98,6 +101,29 @@ function initializeAssociations() {
     foreignKey: "userId",
     as: "user",
   });
+
+  // Restaurant associations
+  Resturant.hasMany(WorkingDay, {
+    foreignKey: "resturantId",
+    as: "workingDays",
+    onDelete: "CASCADE",
+  });
+
+  WorkingDay.belongsTo(Resturant, {
+    foreignKey: "resturantId",
+    as: "restaurant",
+  });
+
+  Resturant.hasMany(Employee, {
+    foreignKey: "resturantId",
+    as: "employees",
+    onDelete: "CASCADE",
+  });
+
+  Employee.belongsTo(Resturant, {
+    foreignKey: "resturantId",
+    as: "restaurant",
+  });
 }
 
 // Call the initialization function
@@ -111,4 +137,7 @@ module.exports = {
   CartItem,
   Reservation,
   User,
+  Resturant,
+  WorkingDay,
+  Employee,
 };

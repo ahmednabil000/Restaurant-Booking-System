@@ -16,6 +16,10 @@ const Meal = sequelize.define("Meal", {
   price: {
     type: DataTypes.DECIMAL(10, 2),
   },
+  imageUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   category: {
     type: DataTypes.STRING,
   },
@@ -25,6 +29,9 @@ const Meal = sequelize.define("Meal", {
   isAvailable: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
+  },
+  imageUrl: {
+    type: DataTypes.STRING,
   },
 });
 
