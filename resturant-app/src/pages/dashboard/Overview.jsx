@@ -283,7 +283,7 @@ const Overview = () => {
     <DashboardLayout>
       <div className="p-6">
         {/* Page Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               لوحة التحكم الرئيسية
@@ -293,18 +293,6 @@ const Overview = () => {
               الإحصائيات
             </p>
           </div>
-          <button
-            onClick={handleManualRefresh}
-            disabled={refreshing}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 ${
-              refreshing
-                ? "bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-            }`}
-          >
-            <FaSync className={`text-sm ${refreshing ? "animate-spin" : ""}`} />
-            <span>{refreshing ? "جار التحديث..." : "تحديث البيانات"}</span>
-          </button>
         </div>
 
         {error && (

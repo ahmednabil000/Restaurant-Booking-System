@@ -56,6 +56,13 @@ router.put(
 );
 
 router.put(
+  "/reservations/:id/reject",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.rejectReservation
+);
+
+router.put(
   "/reservations/:id/cancel",
   authMiddleware.authenticateJWT,
   authMiddleware.requireRole(["admin"]),
@@ -82,6 +89,58 @@ router.put(
   authMiddleware.requireRole(["admin"]),
   reservationController.markNoShow
 );
+
+// Bulk operations for reservations
+router.put(
+  "/reservations/bulk/status",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.bulkUpdateReservationStatus
+);
+
+// Send notification endpoints
+router.post(
+  "/reservations/:id/send-confirmation",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.sendConfirmationNotification
+);
+
+router.post(
+  "/reservations/:id/send-rejection",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.sendRejectionNotification
+);
+
+// Reservation settings endpoints
+router.get(
+  "/reservation-settings",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.getReservationSettings
+);
+
+router.put(
+  "/reservation-settings",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.updateReservationSettings
+);
+
+router.get(
+  "/available-time-slots",
+  reservationController.getAvailableTimeSlots
+);
+
+router.put(
+  "/blocked-dates",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  reservationController.manageBlockedDates
+);
+
+router.get("/blocked-dates", reservationController.getBlockedDates);
 
 // Analytics endpoints (Admin only)
 router.get(

@@ -125,6 +125,43 @@ exports.updateTablesCount = async (req, res) => {
   }
 };
 
+// Get working days for restaurant
+exports.getWorkingDays = async (req, res) => {
+  try {
+    const restaurant = await Resturant.findOne({
+      where: { isActive: true },
+      include: [
+        {
+          model: WorkingDay,
+          as: "workingDays",
+          attributes: ["id", "name", "startHour", "endHour", "isActive"],
+          order: [["name", "ASC"]],
+        },
+      ],
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Working days retrieved successfully",
+      data: restaurant.workingDays,
+    });
+  } catch (error) {
+    console.error("Error getting working days:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 // Add working day to restaurant
 exports.addWorkingDay = async (req, res) => {
   try {
@@ -215,6 +252,138 @@ exports.updateWorkingDay = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating working day:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Get single working day
+exports.getWorkingDay = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const workingDay = await WorkingDay.findOne({
+      where: { id, isActive: true },
+    });
+
+    if (!workingDay) {
+      return res.status(404).json({
+        success: false,
+        message: "Working day not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Working day retrieved successfully",
+      data: workingDay,
+    });
+  } catch (error) {
+    console.error("Error getting working day:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Bulk update working days
+exports.bulkUpdateWorkingDays = async (req, res) => {
+  try {
+    const { workingDays } = req.body;
+
+    if (!Array.isArray(workingDays) || workingDays.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Working days array is required",
+      });
+    }
+
+    const restaurant = await Resturant.findOne({
+      where: { isActive: true },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    const updatePromises = workingDays.map(async (dayData) => {
+      const { id, name, startHour, endHour, isActive } = dayData;
+
+      if (!id) {
+        throw new Error("Working day ID is required for bulk update");
+      }
+
+      const workingDay = await WorkingDay.findOne({
+        where: { id, resturantId: restaurant.id },
+      });
+
+      if (!workingDay) {
+        throw new Error(`Working day with ID ${id} not found`);
+      }
+
+      const updateData = {};
+      if (name !== undefined) updateData.name = name;
+      if (startHour !== undefined) updateData.startHour = startHour;
+      if (endHour !== undefined) updateData.endHour = endHour;
+      if (isActive !== undefined) updateData.isActive = isActive;
+
+      return workingDay.update(updateData);
+    });
+
+    const updatedWorkingDays = await Promise.all(updatePromises);
+
+    res.status(200).json({
+      success: true,
+      message: "Working days updated successfully",
+      data: updatedWorkingDays,
+    });
+  } catch (error) {
+    console.error("Error bulk updating working days:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Toggle working day status
+exports.toggleWorkingDayStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const workingDay = await WorkingDay.findOne({
+      where: { id },
+    });
+
+    if (!workingDay) {
+      return res.status(404).json({
+        success: false,
+        message: "Working day not found",
+      });
+    }
+
+    const updatedWorkingDay = await workingDay.update({
+      isActive: !workingDay.isActive,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Working day ${
+        updatedWorkingDay.isActive ? "activated" : "deactivated"
+      } successfully`,
+      data: updatedWorkingDay,
+    });
+  } catch (error) {
+    console.error("Error toggling working day status:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

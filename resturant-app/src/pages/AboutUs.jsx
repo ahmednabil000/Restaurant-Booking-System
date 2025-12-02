@@ -7,6 +7,8 @@ import AboutUsFeaturesSection from "../ui/AboutUsFeaturesSection";
 import { FaRegClock } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
 import useRestaurantStore from "../store/restaurantStore";
+import { useWorkingDays } from "../hooks/useWorkingDays";
+import BranchesInfo from "../components/BranchesInfo";
 
 // Helper function to convert 24h to 12h format
 const formatTime = (time24) => {
@@ -19,7 +21,7 @@ const formatTime = (time24) => {
 };
 
 // Helper function to translate day names to Arabic
-const translateDay = (englishDay) => {
+const translateDay = (dayName) => {
   const dayMap = {
     Sunday: "الأحد",
     Monday: "الاثنين",
@@ -28,15 +30,50 @@ const translateDay = (englishDay) => {
     Thursday: "الخميس",
     Friday: "الجمعة",
     Saturday: "السبت",
+    // Arabic versions (in case the API returns Arabic names)
+    الأحد: "الأحد",
+    الإثنين: "الاثنين",
+    الاثنين: "الاثنين",
+    الثلاثاء: "الثلاثاء",
+    الأربعاء: "الأربعاء",
+    الخميس: "الخميس",
+    الجمعة: "الجمعة",
+    السبت: "السبت",
   };
-  return dayMap[englishDay] || englishDay;
+  return dayMap[dayName] || dayName;
 };
 
 // Helper function to group working days
 const formatWorkingDays = (workingDays) => {
   if (!workingDays || workingDays.length === 0) return [];
 
-  const activeDays = workingDays.filter((day) => day.isActive);
+  // Only include active working days
+  const activeDays = workingDays.filter((day) => day.isActive === true);
+
+  // Sort days by day order (Sunday = 0, Monday = 1, etc.)
+  const dayOrder = {
+    الأحد: 0,
+    Sunday: 0,
+    الاثنين: 1,
+    الإثنين: 1,
+    Monday: 1,
+    الثلاثاء: 2,
+    Tuesday: 2,
+    الأربعاء: 3,
+    Wednesday: 3,
+    الخميس: 4,
+    Thursday: 4,
+    الجمعة: 5,
+    Friday: 5,
+    السبت: 6,
+    Saturday: 6,
+  };
+
+  activeDays.sort((a, b) => {
+    const orderA = dayOrder[a.name] ?? 999;
+    const orderB = dayOrder[b.name] ?? 999;
+    return orderA - orderB;
+  });
 
   // Group consecutive days with same hours
   const grouped = [];
@@ -44,14 +81,17 @@ const formatWorkingDays = (workingDays) => {
 
   activeDays.forEach((day) => {
     const timeStr = `${formatTime(day.startHour)} - ${formatTime(day.endHour)}`;
+    const arabicDayName = translateDay(day.name);
 
     if (current && current.hours === timeStr) {
-      current.days.push(translateDay(day.name));
+      current.days.push(arabicDayName);
+      current.dayIndexes.push(dayOrder[day.name] ?? 999);
     } else {
       if (current) grouped.push(current);
       current = {
         hours: timeStr,
-        days: [translateDay(day.name)],
+        days: [arabicDayName],
+        dayIndexes: [dayOrder[day.name] ?? 999],
       };
     }
   });
@@ -62,14 +102,18 @@ const formatWorkingDays = (workingDays) => {
   return grouped.map((group) => ({
     ...group,
     daysStr:
-      group.days.length > 1
+      group.days.length > 2 &&
+      group.dayIndexes.every(
+        (index, i) => i === 0 || index === group.dayIndexes[i - 1] + 1
+      )
         ? `${group.days[0]} - ${group.days[group.days.length - 1]}`
-        : group.days[0],
+        : group.days.join(" - "),
   }));
 };
 
 const AboutUs = () => {
   const { restaurant, fetchRestaurantDetails, loading } = useRestaurantStore();
+  const { workingDays, loading: workingDaysLoading } = useWorkingDays();
 
   useEffect(() => {
     fetchRestaurantDetails();
@@ -77,9 +121,10 @@ const AboutUs = () => {
 
   // Extract restaurant data from API response
   const restaurantData = restaurant?.success ? restaurant.data : restaurant;
-  const workingHours = restaurantData?.workingDays
-    ? formatWorkingDays(restaurantData.workingDays)
-    : [];
+
+  // Use working days from the working days service
+  const workingHours =
+    workingDays.length > 0 ? formatWorkingDays(workingDays) : [];
   return (
     <>
       <div className="h-120 sm:h-140 md:h-160 lg:h-180 w-full relative">
@@ -137,25 +182,14 @@ const AboutUs = () => {
               </p>
               <IoLocationSharp className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-[#e26136]" />
             </div>
-            {loading ? (
+            {loading || workingDaysLoading ? (
               <div className="text-center text-sm text-gray-500">
                 جاري التحميل...
               </div>
             ) : (
               <>
-                <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 text-sm sm:text-base md:text-lg lg:text-xl text-[#565d6d] text-center lg:text-end">
-                  <p className="font-semibold">
-                    {restaurantData?.name || "مطعم الأصالة"}
-                  </p>
-                  <p>
-                    {restaurantData?.address || "التجمع الخامس, القاهرة, مصر"}
-                  </p>
-                  {restaurantData?.phone && (
-                    <p className="text-sm sm:text-base md:text-lg text-[#e26136]">
-                      {restaurantData.phone}
-                    </p>
-                  )}
-                </div>
+                {/* Display branches information */}
+                <BranchesInfo />
               </>
             )}
           </div>
@@ -166,7 +200,7 @@ const AboutUs = () => {
               </p>
               <FaRegClock className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-[#e26136]" />
             </div>
-            {loading ? (
+            {loading || workingDaysLoading ? (
               <div className="text-center text-sm text-gray-500">
                 جاري التحميل...
               </div>

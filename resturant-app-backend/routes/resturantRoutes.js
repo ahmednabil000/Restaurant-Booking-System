@@ -22,6 +22,20 @@ router.put(
   resturantController.updateTablesCount
 );
 
+router.get(
+  "/restaurant/working-days",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  resturantController.getWorkingDays
+);
+
+router.get(
+  "/restaurant/working-days/:id",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  resturantController.getWorkingDay
+);
+
 router.post(
   "/restaurant/working-days",
   authMiddleware.authenticateJWT,
@@ -30,10 +44,24 @@ router.post(
 );
 
 router.put(
+  "/restaurant/working-days/bulk",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  resturantController.bulkUpdateWorkingDays
+);
+
+router.put(
   "/restaurant/working-days/:id",
   authMiddleware.authenticateJWT,
   authMiddleware.requireRole(["admin"]),
   resturantController.updateWorkingDay
+);
+
+router.patch(
+  "/restaurant/working-days/:id/toggle",
+  authMiddleware.authenticateJWT,
+  authMiddleware.requireRole(["admin"]),
+  resturantController.toggleWorkingDayStatus
 );
 
 router.delete(

@@ -81,6 +81,76 @@ const Resturant = sequelize.define(
       type: DataTypes.ENUM("$", "$$", "$$$", "$$$$"),
       allowNull: true,
     },
+    // Reservation settings
+    totalCapacity: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 50,
+      validate: {
+        min: 1,
+        max: 1000,
+      },
+    },
+    avgTableCapacity: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 4,
+      validate: {
+        min: 1,
+        max: 20,
+      },
+    },
+    openingTime: {
+      type: DataTypes.TIME,
+      allowNull: true,
+      defaultValue: "09:00:00",
+    },
+    closingTime: {
+      type: DataTypes.TIME,
+      allowNull: true,
+      defaultValue: "22:00:00",
+    },
+    reservationSlotDuration: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 120, // minutes
+      validate: {
+        min: 30,
+        max: 300,
+      },
+    },
+    maxReservationsPerDay: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 100,
+      validate: {
+        min: 1,
+        max: 1000,
+      },
+    },
+    maxGuestsPerReservation: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 20,
+      validate: {
+        min: 1,
+        max: 50,
+      },
+    },
+    advanceBookingDays: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 30,
+      validate: {
+        min: 1,
+        max: 365,
+      },
+    },
+    allowReservations: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: false,
+    },
   },
   {
     tableName: "Resturants",

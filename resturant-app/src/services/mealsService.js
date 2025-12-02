@@ -1,6 +1,25 @@
 // Meals API service functions
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+const getAuthToken = () => {
+  return (
+    localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token")
+  );
+};
+
+const buildHeaders = (includeAuth = true) => {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (includeAuth) {
+    const token = getAuthToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
 // Get meals with pagination and filters
 export const getMeals = async ({
   page = 1,
@@ -38,9 +57,7 @@ export const getMeals = async ({
 
     const response = await fetch(`${API_BASE_URL}/meals?${params.toString()}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(false), // Public endpoint
     });
 
     if (!response.ok) {
@@ -127,4 +144,130 @@ export const getMealsByTags = async (
     console.error("Error fetching meals by tags:", error);
     throw error;
   }
+};
+
+// Search meals
+export const searchMeals = async (searchQuery, page = 1, pageSize = 10) => {
+  try {
+    const params = new URLSearchParams({
+      searchQuery,
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/meals/search?${params.toString()}`,
+      {
+        method: "GET",
+        headers: buildHeaders(false), // Public endpoint
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error searching meals:", error);
+    throw error;
+  }
+};
+
+// Get meal by ID
+export const getMealById = async (mealId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/meals/${mealId}`, {
+      method: "GET",
+      headers: buildHeaders(false), // Public endpoint
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching meal by ID:", error);
+    throw error;
+  }
+};
+
+// Create new meal
+export const createMeal = async (mealData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/meals`, {
+      method: "POST",
+      headers: buildHeaders(true), // Admin required
+      body: JSON.stringify(mealData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error creating meal:", error);
+    throw error;
+  }
+};
+
+// Update meal
+export const updateMeal = async (mealId, mealData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/meals/${mealId}`, {
+      method: "PUT",
+      headers: buildHeaders(true), // Admin required
+      body: JSON.stringify(mealData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error updating meal:", error);
+    throw error;
+  }
+};
+
+// Delete meal
+export const deleteMeal = async (mealId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/meals/${mealId}`, {
+      method: "DELETE",
+      headers: buildHeaders(true), // Admin required
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error deleting meal:", error);
+    throw error;
+  }
+};
+
+export default {
+  getMeals,
+  getMealsByTags,
+  searchMeals,
+  getMealById,
+  createMeal,
+  updateMeal,
+  deleteMeal,
 };

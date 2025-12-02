@@ -13,6 +13,8 @@ const cartRoutes = require("./routes/cartRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const resturantRoutes = require("./routes/resturantRoutes");
 const tagsRoutes = require("./routes/tagsRoutes");
+const staticPagesRoutes = require("./routes/staticPagesRoutes");
+const branchesRoutes = require("./routes/branchesRoutes");
 const {
   createArabicMockData,
   createRestaurantMockData,
@@ -64,6 +66,8 @@ app.use(mealsRoutes);
 app.use(reservationRoutes);
 app.use(resturantRoutes);
 app.use(cartRoutes);
+app.use(staticPagesRoutes);
+app.use(branchesRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({

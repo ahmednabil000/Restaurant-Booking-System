@@ -42,11 +42,16 @@ const Reservation = sequelize.define("Reservation", {
       "confirmed",
       "cancelled",
       "completed",
-      "no-show"
+      "no-show",
+      "rejected"
     ),
     defaultValue: "pending",
   },
   specialRequests: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  rejectionReason: {
     type: DataTypes.TEXT,
     allowNull: true,
   },

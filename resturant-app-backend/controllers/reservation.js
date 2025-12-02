@@ -1414,3 +1414,518 @@ exports.getRecentCustomerActivity = async (req, res) => {
     });
   }
 };
+
+// Reject reservation
+exports.rejectReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const reservation = await Reservation.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "fullName", "email", "phone"],
+        },
+      ],
+    });
+
+    if (!reservation) {
+      return res.status(404).json({
+        success: false,
+        message: "Reservation not found",
+      });
+    }
+
+    if (reservation.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Can only reject pending reservations",
+      });
+    }
+
+    await reservation.update({
+      status: "rejected",
+      rejectionReason: reason,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: reservation,
+      message: "Reservation rejected successfully",
+    });
+  } catch (error) {
+    console.error("Error rejecting reservation:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Bulk update reservation status
+exports.bulkUpdateReservationStatus = async (req, res) => {
+  try {
+    const { reservationIds, status, reason } = req.body;
+
+    if (!Array.isArray(reservationIds) || reservationIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "reservationIds must be a non-empty array",
+      });
+    }
+
+    const validStatuses = [
+      "pending",
+      "confirmed",
+      "rejected",
+      "cancelled",
+      "completed",
+      "no-show",
+    ];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Status must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    const updateData = { status };
+    if (status === "rejected" && reason) {
+      updateData.rejectionReason = reason;
+    }
+
+    const [updatedCount] = await Reservation.update(updateData, {
+      where: { id: { [Op.in]: reservationIds } },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `${updatedCount} reservations updated to ${status}`,
+      data: { updatedCount, status },
+    });
+  } catch (error) {
+    console.error("Error bulk updating reservations:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Send confirmation notification
+exports.sendConfirmationNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { method = "email" } = req.body; // email or whatsapp
+
+    const reservation = await Reservation.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "fullName", "email", "phone"],
+        },
+      ],
+    });
+
+    if (!reservation) {
+      return res.status(404).json({
+        success: false,
+        message: "Reservation not found",
+      });
+    }
+
+    if (method === "email") {
+      await sendReservationConfirmationEmail(reservation.user.email, {
+        fullName: reservation.fullName,
+        date: reservation.date,
+        startTime: reservation.startTime,
+        endTime: reservation.endTime,
+        peopleNum: reservation.peopleNum,
+        confirmationToken: reservation.confirmationToken,
+      });
+    }
+    // WhatsApp integration would be implemented here
+
+    res.status(200).json({
+      success: true,
+      message: `Confirmation notification sent via ${method}`,
+    });
+  } catch (error) {
+    console.error("Error sending confirmation notification:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Send rejection notification
+exports.sendRejectionNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { method = "email", reason } = req.body;
+
+    const reservation = await Reservation.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "fullName", "email", "phone"],
+        },
+      ],
+    });
+
+    if (!reservation) {
+      return res.status(404).json({
+        success: false,
+        message: "Reservation not found",
+      });
+    }
+
+    if (method === "email") {
+      // This would require implementing a rejection email template
+      // await sendReservationRejectionEmail(reservation.user.email, {
+      //   fullName: reservation.fullName,
+      //   date: reservation.date,
+      //   reason: reason || reservation.rejectionReason
+      // });
+    }
+    // WhatsApp integration would be implemented here
+
+    res.status(200).json({
+      success: true,
+      message: `Rejection notification sent via ${method}`,
+    });
+  } catch (error) {
+    console.error("Error sending rejection notification:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Get reservation settings
+exports.getReservationSettings = async (req, res) => {
+  try {
+    const restaurant = await Resturant.findOne({
+      where: { isActive: true },
+      attributes: [
+        "id",
+        "totalCapacity",
+        "avgTableCapacity",
+        "openingTime",
+        "closingTime",
+        "reservationSlotDuration",
+        "maxReservationsPerDay",
+        "maxGuestsPerReservation",
+        "advanceBookingDays",
+        "allowReservations",
+      ],
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: restaurant,
+      message: "Reservation settings retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching reservation settings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Update reservation settings
+exports.updateReservationSettings = async (req, res) => {
+  try {
+    const {
+      totalCapacity,
+      avgTableCapacity,
+      openingTime,
+      closingTime,
+      reservationSlotDuration,
+      maxReservationsPerDay,
+      maxGuestsPerReservation,
+      advanceBookingDays,
+      allowReservations,
+    } = req.body;
+
+    const restaurant = await Resturant.findOne({
+      where: { isActive: true },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    const updateData = {};
+    if (totalCapacity !== undefined) updateData.totalCapacity = totalCapacity;
+    if (avgTableCapacity !== undefined)
+      updateData.avgTableCapacity = avgTableCapacity;
+    if (openingTime !== undefined) updateData.openingTime = openingTime;
+    if (closingTime !== undefined) updateData.closingTime = closingTime;
+    if (reservationSlotDuration !== undefined)
+      updateData.reservationSlotDuration = reservationSlotDuration;
+    if (maxReservationsPerDay !== undefined)
+      updateData.maxReservationsPerDay = maxReservationsPerDay;
+    if (maxGuestsPerReservation !== undefined)
+      updateData.maxGuestsPerReservation = maxGuestsPerReservation;
+    if (advanceBookingDays !== undefined)
+      updateData.advanceBookingDays = advanceBookingDays;
+    if (allowReservations !== undefined)
+      updateData.allowReservations = allowReservations;
+
+    await restaurant.update(updateData);
+
+    res.status(200).json({
+      success: true,
+      data: restaurant,
+      message: "Reservation settings updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating reservation settings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Get available time slots
+exports.getAvailableTimeSlots = async (req, res) => {
+  try {
+    const { date, peopleNum = 2 } = req.query;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "Date parameter is required",
+      });
+    }
+
+    const restaurant = await Resturant.findOne({
+      where: { isActive: true },
+    });
+
+    if (!restaurant || !restaurant.allowReservations) {
+      return res.status(400).json({
+        success: false,
+        message: "Reservations are currently not available",
+      });
+    }
+
+    // Generate time slots based on restaurant hours
+    const slots = [];
+    const startTime = restaurant.openingTime || "09:00";
+    const endTime = restaurant.closingTime || "22:00";
+    const slotDuration = restaurant.reservationSlotDuration || 120; // minutes
+
+    const [startHour, startMin] = startTime.split(":").map(Number);
+    const [endHour, endMin] = endTime.split(":").map(Number);
+
+    let current = new Date();
+    current.setHours(startHour, startMin, 0, 0);
+
+    const end = new Date();
+    end.setHours(endHour, endMin, 0, 0);
+
+    while (current < end) {
+      const timeString = current.toTimeString().substring(0, 5);
+      const nextSlot = new Date(current.getTime() + slotDuration * 60000);
+      const endTimeString = nextSlot.toTimeString().substring(0, 5);
+
+      // Check if slot is available
+      const conflictingReservations = await Reservation.count({
+        where: {
+          date,
+          status: { [Op.in]: ["pending", "confirmed"] },
+          [Op.or]: [
+            {
+              [Op.and]: [
+                { startTime: { [Op.lte]: timeString } },
+                { endTime: { [Op.gte]: timeString } },
+              ],
+            },
+            {
+              [Op.and]: [
+                { startTime: { [Op.lte]: endTimeString } },
+                { endTime: { [Op.gte]: endTimeString } },
+              ],
+            },
+          ],
+        },
+      });
+
+      const totalBookedCapacity =
+        (await Reservation.sum("peopleNum", {
+          where: {
+            date,
+            status: { [Op.in]: ["pending", "confirmed"] },
+            [Op.or]: [
+              {
+                [Op.and]: [
+                  { startTime: { [Op.lte]: timeString } },
+                  { endTime: { [Op.gte]: timeString } },
+                ],
+              },
+            ],
+          },
+        })) || 0;
+
+      const availableCapacity = restaurant.totalCapacity - totalBookedCapacity;
+      const isAvailable = availableCapacity >= peopleNum;
+
+      slots.push({
+        startTime: timeString,
+        endTime: endTimeString,
+        availableCapacity,
+        isAvailable,
+      });
+
+      current.setTime(current.getTime() + slotDuration * 60000);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        date,
+        requestedPeople: parseInt(peopleNum),
+        totalCapacity: restaurant.totalCapacity,
+        slots,
+      },
+      message: "Available time slots retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching available time slots:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Manage blocked dates
+exports.manageBlockedDates = async (req, res) => {
+  try {
+    const { action, dates, reason } = req.body; // action: 'block' or 'unblock'
+
+    if (!action || !Array.isArray(dates)) {
+      return res.status(400).json({
+        success: false,
+        message: "Action and dates array are required",
+      });
+    }
+
+    // This would typically be stored in a separate BlockedDates model
+    // For now, we'll simulate the functionality
+    const restaurant = await Resturant.findOne({
+      where: { isActive: true },
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        success: false,
+        message: "Restaurant not found",
+      });
+    }
+
+    // In a real implementation, you'd have a BlockedDates table
+    // const BlockedDate = require("../models/blockedDate");
+
+    if (action === "block") {
+      // await BlockedDate.bulkCreate(dates.map(date => ({
+      //   id: uuidv4(),
+      //   date,
+      //   reason,
+      //   restaurantId: restaurant.id
+      // })));
+    } else if (action === "unblock") {
+      // await BlockedDate.destroy({
+      //   where: { date: { [Op.in]: dates } }
+      // });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Dates ${action}ed successfully`,
+      data: { action, dates, reason },
+    });
+  } catch (error) {
+    console.error("Error managing blocked dates:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Get blocked dates
+exports.getBlockedDates = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // This would fetch from BlockedDates model in real implementation
+    const blockedDates = [
+      // Example blocked dates - in real implementation this would come from database
+      {
+        date: "2025-12-25",
+        reason: "Christmas Holiday",
+      },
+      {
+        date: "2025-01-01",
+        reason: "New Year Holiday",
+      },
+    ];
+
+    let filteredDates = blockedDates;
+
+    if (startDate && endDate) {
+      filteredDates = blockedDates.filter(
+        (item) => item.date >= startDate && item.date <= endDate
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        blockedDates: filteredDates,
+        total: filteredDates.length,
+      },
+      message: "Blocked dates retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching blocked dates:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};

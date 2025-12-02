@@ -13,6 +13,9 @@ import {
   FaTimes,
   FaEnvelope,
   FaHome,
+  FaImage,
+  FaClock,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 
 const DashboardLayout = ({ children }) => {
@@ -34,7 +37,22 @@ const DashboardLayout = ({ children }) => {
     {
       title: "إدارة القائمة",
       icon: FaUtensils,
-      path: "/dashboard/menu",
+      path: "/dashboard/menu-management",
+    },
+    {
+      title: "إدارة المحتوى",
+      icon: FaImage,
+      path: "/dashboard/pages",
+    },
+    {
+      title: "أوقات العمل",
+      icon: FaClock,
+      path: "/dashboard/working-days",
+    },
+    {
+      title: "الفروع",
+      icon: FaMapMarkerAlt,
+      path: "/dashboard/branches",
     },
     {
       title: "العملاء",
@@ -76,7 +94,7 @@ const DashboardLayout = ({ children }) => {
       <div
         className={`fixed inset-y-0 right-0 z-50 w-64 bg-white shadow-lg transform ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+        } transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col max-h-screen overflow-y-auto`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -95,7 +113,7 @@ const DashboardLayout = ({ children }) => {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="px-4 py-6">
+        <nav className="px-4 py-6 flex-1 overflow-y-auto">
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -135,29 +153,42 @@ const DashboardLayout = ({ children }) => {
               );
             })}
           </ul>
-        </nav>
 
-        {/* Bottom Actions */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="space-y-2">
-            <NavLink
-              to="/"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-orange-600 hover:shadow-md rounded-lg transition-all duration-200 hover:scale-[1.01]"
-            >
-              <FaHome className="text-xl text-gray-500 transition-colors duration-200" />
-              <span className="font-medium transition-colors duration-200">
-                العودة للموقع
-              </span>
-            </NavLink>
+          {/* Secondary Actions */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="space-y-2">
+              <NavLink
+                to="/"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-orange-600 hover:shadow-md rounded-lg transition-all duration-200 hover:scale-[1.01]"
+              >
+                <FaHome className="text-xl text-gray-500 transition-colors duration-200" />
+                <span className="font-medium transition-colors duration-200">
+                  العودة للموقع
+                </span>
+              </NavLink>
 
-            <button className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 w-full text-right hover:scale-[1.01]">
-              <FaSignOutAlt className="text-xl transition-colors duration-200" />
-              <span className="font-medium transition-colors duration-200">
-                تسجيل الخروج
-              </span>
-            </button>
+              <button className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 w-full text-right hover:scale-[1.01]">
+                <FaSignOutAlt className="text-xl transition-colors duration-200" />
+                <span className="font-medium transition-colors duration-200">
+                  تسجيل الخروج
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
+
+          {/* User Info */}
+          <div className="mt-4 pt-4 border-t border-gray-200 shrink-0">
+            <div className="flex items-center gap-3 px-2">
+              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">إ</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">المدير</p>
+                <p className="text-xs text-gray-600">admin@restaurant.com</p>
+              </div>
+            </div>
+          </div>
+        </nav>
       </div>
 
       {/* Mobile Overlay */}
@@ -169,7 +200,7 @@ const DashboardLayout = ({ children }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 lg:mr-8">
+      <div className="flex-1 lg:mr-64">
         {/* Mobile Header */}
         <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3">
           <div className="flex items-center justify-between">

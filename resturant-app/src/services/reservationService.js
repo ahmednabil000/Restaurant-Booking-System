@@ -212,3 +212,269 @@ export const updateReservation = async (reservationId, updateData) => {
     throw error;
   }
 };
+
+// ADMIN FUNCTIONS
+
+// Get all reservations (Admin only)
+export const getAllReservations = async (params = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    // Add pagination
+    if (params.page) queryParams.append("page", params.page);
+    if (params.pageSize) queryParams.append("pageSize", params.pageSize);
+
+    // Add filters
+    if (params.date) queryParams.append("date", params.date);
+    if (params.status) queryParams.append("status", params.status);
+    if (params.peopleNum) queryParams.append("peopleNum", params.peopleNum);
+    if (params.startDate) queryParams.append("startDate", params.startDate);
+    if (params.endDate) queryParams.append("endDate", params.endDate);
+
+    // Add sorting
+    if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+    if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+
+    const response = await fetch(
+      `${API_BASE_URL}/reservations?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: buildHeaders(true), // Admin auth required
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في جلب الحجوزات: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching all reservations:", error);
+    throw error;
+  }
+};
+
+// Get reservation by ID
+export const getReservationById = async (reservationId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}`,
+      {
+        method: "GET",
+        headers: buildHeaders(false), // Public endpoint
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في جلب الحجز: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching reservation by ID:", error);
+    throw error;
+  }
+};
+
+// Confirm reservation (Admin only)
+export const confirmReservation = async (reservationId, data = {}) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}/confirm`,
+      {
+        method: "PUT",
+        headers: buildHeaders(true), // Admin auth required
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في تأكيد الحجز: ${response.status}`
+      );
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error confirming reservation:", error);
+    throw error;
+  }
+};
+
+// Reject reservation (Admin only)
+export const rejectReservation = async (reservationId, reason) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}/reject`,
+      {
+        method: "PUT",
+        headers: buildHeaders(true), // Admin auth required
+        body: JSON.stringify({ reason }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في رفض الحجز: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error rejecting reservation:", error);
+    throw error;
+  }
+};
+
+// Complete reservation (Admin only)
+export const completeReservation = async (reservationId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}/complete`,
+      {
+        method: "PUT",
+        headers: buildHeaders(true), // Admin auth required
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في إتمام الحجز: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error completing reservation:", error);
+    throw error;
+  }
+};
+
+// Mark reservation as no-show (Admin only)
+export const markNoShow = async (reservationId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}/no-show`,
+      {
+        method: "PUT",
+        headers: buildHeaders(true), // Admin auth required
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في تسجيل عدم الحضور: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error marking no-show:", error);
+    throw error;
+  }
+};
+
+// Bulk update reservation status (Admin only)
+export const bulkUpdateStatus = async (reservationIds, status, reason = "") => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/reservations/bulk/status`, {
+      method: "PUT",
+      headers: buildHeaders(true), // Admin auth required
+      body: JSON.stringify({
+        reservationIds,
+        status,
+        reason,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في التحديث الجماعي: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error bulk updating status:", error);
+    throw error;
+  }
+};
+
+// Send confirmation notification (Admin only)
+export const sendConfirmationNotification = async (
+  reservationId,
+  method = "email"
+) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}/send-confirmation`,
+      {
+        method: "POST",
+        headers: buildHeaders(true), // Admin auth required
+        body: JSON.stringify({ method }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في إرسال التأكيد: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error sending confirmation:", error);
+    throw error;
+  }
+};
+
+// Send rejection notification (Admin only)
+export const sendRejectionNotification = async (
+  reservationId,
+  method = "email",
+  reason = ""
+) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/reservations/${reservationId}/send-rejection`,
+      {
+        method: "POST",
+        headers: buildHeaders(true), // Admin auth required
+        body: JSON.stringify({ method, reason }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `خطأ في إرسال الرفض: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error sending rejection:", error);
+    throw error;
+  }
+};
