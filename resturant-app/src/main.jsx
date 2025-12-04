@@ -18,7 +18,6 @@ import TableBooking from "./pages/Reservation/TableBooking.jsx";
 import Overview from "./pages/dashboard/Overview.jsx";
 import MenuManagement from "./pages/dashboard/MenuManagement.jsx";
 import ReservationsManagement from "./pages/dashboard/ReservationsManagement.jsx";
-import PagesManagement from "./pages/dashboard/PagesManagement.jsx";
 import WorkingDaysManagement from "./pages/dashboard/WorkingDaysManagement.jsx";
 import BranchesManagement from "./pages/dashboard/BranchesManagement.jsx";
 import Customers from "./pages/dashboard/Customers.jsx";
@@ -26,6 +25,13 @@ import Reviews from "./pages/dashboard/Reviews.jsx";
 import Messages from "./pages/dashboard/Messages.jsx";
 import Reports from "./pages/dashboard/Reports.jsx";
 import Settings from "./pages/dashboard/Settings.jsx";
+import RestaurantManagement from "./pages/dashboard/RestaurantManagement.jsx";
+import UsersManagement from "./pages/dashboard/UsersManagement.jsx";
+import Unauthorized from "./pages/Unauthorized.jsx";
+
+// Import protection components
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,8 +41,22 @@ const router = createBrowserRouter([
       { path: "about-us", element: <AboutUs /> },
       { path: "menu", element: <Menu /> },
       { path: "contact-us", element: <ContactUs /> },
-      { path: "reserve", element: <TableBooking /> },
-      { path: "cart", element: <Cart /> },
+      {
+        path: "reserve",
+        element: (
+          <ProtectedRoute>
+            <TableBooking />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "cart",
+        element: (
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
   {
@@ -52,52 +72,113 @@ const router = createBrowserRouter([
     element: <LoginError />,
   },
   {
+    path: "unauthorized",
+    element: <Unauthorized />,
+  },
+  // Admin-protected dashboard routes
+  {
     path: "dashboard",
-    element: <Overview />,
+    element: (
+      <AdminProtectedRoute>
+        <Overview />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/overview",
-    element: <Overview />,
+    element: (
+      <AdminProtectedRoute>
+        <Overview />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/menu-management",
-    element: <MenuManagement />,
-  },
-  {
-    path: "dashboard/pages",
-    element: <PagesManagement />,
+    element: (
+      <AdminProtectedRoute>
+        <MenuManagement />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/working-days",
-    element: <WorkingDaysManagement />,
+    element: (
+      <AdminProtectedRoute>
+        <WorkingDaysManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/restaurant-management",
+    element: (
+      <AdminProtectedRoute>
+        <RestaurantManagement />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/branches",
-    element: <BranchesManagement />,
+    element: (
+      <AdminProtectedRoute>
+        <BranchesManagement />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/reservations",
-    element: <ReservationsManagement />,
+    element: (
+      <AdminProtectedRoute>
+        <ReservationsManagement />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/customers",
-    element: <Customers />,
+    element: (
+      <AdminProtectedRoute>
+        <Customers />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/users-management",
+    element: (
+      <AdminProtectedRoute>
+        <UsersManagement />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/reviews",
-    element: <Reviews />,
+    element: (
+      <AdminProtectedRoute>
+        <Reviews />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/messages",
-    element: <Messages />,
+    element: (
+      <AdminProtectedRoute>
+        <Messages />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/reports",
-    element: <Reports />,
+    element: (
+      <AdminProtectedRoute>
+        <Reports />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: "dashboard/settings",
-    element: <Settings />,
+    element: (
+      <AdminProtectedRoute>
+        <Settings />
+      </AdminProtectedRoute>
+    ),
   },
 ]);
 

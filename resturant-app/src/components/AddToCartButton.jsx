@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { AiOutlinePlus, AiOutlineCheck } from "react-icons/ai";
 import { useAddToCartMutation } from "../hooks/useCart";
 import useAuthStore from "../store/authStore";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   showSuccessNotification,
   showErrorNotification,

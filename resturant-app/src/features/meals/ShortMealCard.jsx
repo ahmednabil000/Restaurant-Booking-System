@@ -1,11 +1,17 @@
 import burger from "../../assets/burger.jpg";
 import AddToCartButton from "../../components/AddToCartButton";
+import { getFullImageUrl } from "../../services/mealsService";
 
 const ShortMealCard = ({ item, description }) => {
   return (
-    <div className="h-auto min-h-80 sm:min-h-96 md:min-h-100 lg:h-[28rem] w-full max-w-sm sm:max-w-md lg:max-w-lg justify-between rounded-xl border-2 border-gray-400/50 flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 md:p-5 hover:shadow-lg transition-shadow duration-200">
+    <div className="h-auto min-h-80 sm:min-h-96 md:min-h-100 lg:h-112 w-full max-w-sm sm:max-w-md lg:max-w-lg justify-between rounded-xl border-2 border-gray-400/50 flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 md:p-5 hover:shadow-lg transition-shadow duration-200">
       <img
-        src={item?.image || burger}
+        src={
+          getFullImageUrl(item?.imageUrl) ||
+          getFullImageUrl(item?.image) ||
+          item?.image ||
+          burger
+        }
         alt={item?.name || "meal"}
         className="h-36 sm:h-40 md:h-44 lg:h-48 w-full object-cover rounded-xl"
       />

@@ -5,6 +5,7 @@ const Cart = require("./cart");
 const CartItem = require("./cartItem");
 const Reservation = require("./reservation");
 const User = require("./user");
+const Role = require("./role");
 const Resturant = require("./resturant");
 const WorkingDay = require("./workingDay");
 const Employee = require("./employee");
@@ -137,6 +138,7 @@ module.exports = {
   CartItem,
   Reservation,
   User,
+  Role,
   Resturant,
   WorkingDay,
   Employee,

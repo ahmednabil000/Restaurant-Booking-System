@@ -142,7 +142,7 @@ const Overview = () => {
             id: m.meal?.id || m.meal?.name,
             name: m.meal?.name || "-",
             orders: Number(m.totalOrdered || m.orderCount || 0),
-            image: m.meal?.imageUrl || "/api/placeholder/80/80",
+            image: m.meal?.imageUrl || "",
           }));
           setPopularDishes(mapped);
         }

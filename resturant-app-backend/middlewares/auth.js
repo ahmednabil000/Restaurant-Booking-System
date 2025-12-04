@@ -58,3 +58,50 @@ exports.requireRole = (roles) => {
     next();
   };
 };
+
+// Convenience middleware for admin-only routes
+exports.requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  if (req.user.role !== "admin" && req.user.role !== "owner") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin or owner access required",
+    });
+  }
+
+  next();
+};
+
+// Middleware specifically for dashboard access (admin or owner)
+exports.requireDashboardAccess = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  if (req.user.role !== "admin" && req.user.role !== "owner") {
+    return res.status(403).json({
+      success: false,
+      message: "Dashboard access requires admin or owner role",
+    });
+  }
+
+  next();
+};
+
+// Combined middleware for admin authentication (JWT + Admin role)
+exports.authenticateAdmin = [exports.authenticateJWT, exports.requireAdmin];
+
+// Combined middleware for dashboard authentication (JWT + Admin or Owner role)
+exports.authenticateDashboard = [
+  exports.authenticateJWT,
+  exports.requireDashboardAccess,
+];

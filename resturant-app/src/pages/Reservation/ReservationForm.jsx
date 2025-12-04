@@ -1,6 +1,6 @@
 // src/components/ReservationForm.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import TextInput from "../../ui/TextInput";
 import SelectInput from "../../ui/SelectInput";
 import TimePicker from "../../components/ui/TimePicker";
@@ -328,10 +328,7 @@ const ReservationForm = () => {
       } catch (err) {
         if (err.name !== "AbortError") {
           console.error("Table fetch error:", err);
-          // For development: Always provide mock data when there's any error
-          console.log("Providing mock tables due to error");
-          setAvailableTables([1, 2, 3, 4, 5, 6, 7, 8]); // Mock tables
-          setTablesError(null); // Clear error since we're providing mock data
+          setTablesError("خطأ في تحميل الطاولات المتاحة");
         }
       } finally {
         setLoadingTables(false);

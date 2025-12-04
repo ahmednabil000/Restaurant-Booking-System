@@ -77,6 +77,22 @@ const Resturant = sequelize.define(
         max: 5,
       },
     },
+    serviceFees: {
+      type: DataTypes.DECIMAL,
+      allowNull: false,
+    },
+    facebookUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    xUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    instgramUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     priceRange: {
       type: DataTypes.ENUM("$", "$$", "$$$", "$$$$"),
       allowNull: true,

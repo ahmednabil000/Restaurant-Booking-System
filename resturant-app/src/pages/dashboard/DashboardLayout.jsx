@@ -13,9 +13,10 @@ import {
   FaTimes,
   FaEnvelope,
   FaHome,
-  FaImage,
   FaClock,
   FaMapMarkerAlt,
+  FaUserShield,
+  FaStore,
 } from "react-icons/fa";
 
 const DashboardLayout = ({ children }) => {
@@ -40,14 +41,14 @@ const DashboardLayout = ({ children }) => {
       path: "/dashboard/menu-management",
     },
     {
-      title: "إدارة المحتوى",
-      icon: FaImage,
-      path: "/dashboard/pages",
-    },
-    {
       title: "أوقات العمل",
       icon: FaClock,
       path: "/dashboard/working-days",
+    },
+    {
+      title: "بيانات المطعم",
+      icon: FaStore,
+      path: "/dashboard/restaurant-management",
     },
     {
       title: "الفروع",
@@ -58,6 +59,11 @@ const DashboardLayout = ({ children }) => {
       title: "العملاء",
       icon: FaUsers,
       path: "/dashboard/customers",
+    },
+    {
+      title: "إدارة المستخدمين",
+      icon: FaUserShield,
+      path: "/dashboard/users-management",
     },
     {
       title: "التقييمات",
@@ -194,7 +200,7 @@ const DashboardLayout = ({ children }) => {
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

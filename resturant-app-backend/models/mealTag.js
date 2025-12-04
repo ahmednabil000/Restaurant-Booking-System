@@ -5,9 +5,8 @@ const MealTag = sequelize.define(
   "MealTag",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       primaryKey: true,
-      autoIncrement: true,
     },
     MealId: {
       type: DataTypes.STRING,
@@ -35,7 +34,5 @@ const MealTag = sequelize.define(
     ],
   }
 );
-
-module.exports = MealTag;
 
 module.exports = MealTag;

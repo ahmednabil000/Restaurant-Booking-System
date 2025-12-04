@@ -26,11 +26,11 @@ import * as mealsService from "../../services/mealsService";
 const TagCard = ({ tag, onEdit, onDelete, onViewMeals }) => (
   <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
     <div className="flex items-center justify-between mb-3">
-      <div 
+      <div
         className="px-3 py-1 rounded-full text-sm font-medium"
-        style={{ 
-          backgroundColor: tag.bgColor || "#007bff", 
-          color: tag.titleColor || "#fff" 
+        style={{
+          backgroundColor: tag.bgColor || "#007bff",
+          color: tag.titleColor || "#fff",
         }}
       >
         {tag.title}
@@ -72,9 +72,12 @@ const MealCard = ({ meal, onEdit, onDelete, onToggleAvailability }) => (
   <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
     <div className="flex gap-4">
       <img
-        src={meal.imageUrl || "/api/placeholder/80/80"}
+        src={meal.imageUrl || ""}
         alt={meal.title}
         className="w-20 h-20 object-cover rounded-lg"
+        onError={(e) => {
+          e.target.style.display = "none";
+        }}
       />
       <div className="flex-1">
         <div className="flex items-start justify-between mb-2">
@@ -82,10 +85,18 @@ const MealCard = ({ meal, onEdit, onDelete, onToggleAvailability }) => (
           <div className="flex items-center gap-2">
             <button
               onClick={() => onToggleAvailability(meal)}
-              className={`p-1 rounded ${meal.isAvailable ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
+              className={`p-1 rounded ${
+                meal.isAvailable
+                  ? "text-green-600 hover:bg-green-50"
+                  : "text-red-600 hover:bg-red-50"
+              }`}
               title={meal.isAvailable ? "متاح" : "غير متاح"}
             >
-              {meal.isAvailable ? <FaToggleOn className="text-lg" /> : <FaToggleOff className="text-lg" />}
+              {meal.isAvailable ? (
+                <FaToggleOn className="text-lg" />
+              ) : (
+                <FaToggleOff className="text-lg" />
+              )}
             </button>
             <button
               onClick={() => onEdit(meal)}
@@ -103,7 +114,9 @@ const MealCard = ({ meal, onEdit, onDelete, onToggleAvailability }) => (
             </button>
           </div>
         </div>
-        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{meal.description}</p>
+        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+          {meal.description}
+        </p>
         <div className="flex items-center justify-between">
           <span className="font-bold text-green-600">{meal.price} ج.م</span>
           <div className="flex items-center gap-2">
@@ -193,7 +206,7 @@ const TagModal = ({ isOpen, onClose, tag, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-800">
@@ -221,7 +234,9 @@ const TagModal = ({ isOpen, onClose, tag, onSave }) => {
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="مثال: نباتي، حار، الأكثر طلباً"
               required
@@ -237,13 +252,17 @@ const TagModal = ({ isOpen, onClose, tag, onSave }) => {
                 <input
                   type="color"
                   value={formData.bgColor}
-                  onChange={(e) => setFormData({ ...formData, bgColor: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bgColor: e.target.value })
+                  }
                   className="w-10 h-10 rounded border border-gray-300"
                 />
                 <input
                   type="text"
                   value={formData.bgColor}
-                  onChange={(e) => setFormData({ ...formData, bgColor: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bgColor: e.target.value })
+                  }
                   className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                 />
               </div>
@@ -257,13 +276,17 @@ const TagModal = ({ isOpen, onClose, tag, onSave }) => {
                 <input
                   type="color"
                   value={formData.titleColor}
-                  onChange={(e) => setFormData({ ...formData, titleColor: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, titleColor: e.target.value })
+                  }
                   className="w-10 h-10 rounded border border-gray-300"
                 />
                 <input
                   type="text"
                   value={formData.titleColor}
-                  onChange={(e) => setFormData({ ...formData, titleColor: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, titleColor: e.target.value })
+                  }
                   className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                 />
               </div>
@@ -275,11 +298,11 @@ const TagModal = ({ isOpen, onClose, tag, onSave }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               معاينة
             </label>
-            <div 
+            <div
               className="inline-block px-3 py-1 rounded-full text-sm font-medium"
-              style={{ 
-                backgroundColor: formData.bgColor, 
-                color: formData.titleColor 
+              style={{
+                backgroundColor: formData.bgColor,
+                color: formData.titleColor,
               }}
             >
               {formData.title || "نص تجريبي"}
@@ -333,7 +356,7 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
         category: meal.category || "",
         type: meal.type || "breakfast",
         isAvailable: meal.isAvailable !== undefined ? meal.isAvailable : true,
-        tagIds: meal.tags ? meal.tags.map(tag => tag.id) : [],
+        tagIds: meal.tags ? meal.tags.map((tag) => tag.id) : [],
       });
     } else {
       setFormData({
@@ -352,7 +375,11 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.description.trim() || !formData.price) {
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.price
+    ) {
       setError("العنوان والوصف والسعر مطلوبة");
       return;
     }
@@ -381,18 +408,18 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
   };
 
   const toggleTag = (tagId) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tagIds: prev.tagIds.includes(tagId)
-        ? prev.tagIds.filter(id => id !== tagId)
-        : [...prev.tagIds, tagId]
+        ? prev.tagIds.filter((id) => id !== tagId)
+        : [...prev.tagIds, tagId],
     }));
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-800">
@@ -421,7 +448,9 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="مثال: كباب الدجاج"
                 required
@@ -436,7 +465,9 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
                 type="number"
                 step="0.01"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="45.50"
                 required
@@ -450,7 +481,9 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows="3"
               placeholder="وصف مفصل للوجبة..."
@@ -465,7 +498,9 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
               </label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, type: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
@@ -482,7 +517,9 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
               <input
                 type="text"
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="مثال: مشويات، معجنات"
               />
@@ -493,10 +530,14 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
                 <input
                   type="checkbox"
                   checked={formData.isAvailable}
-                  onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isAvailable: e.target.checked })
+                  }
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">متاح للطلب</span>
+                <span className="text-sm font-medium text-gray-700">
+                  متاح للطلب
+                </span>
               </label>
             </div>
           </div>
@@ -508,7 +549,9 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
             <input
               type="url"
               value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, imageUrl: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="https://example.com/image.jpg"
             />
@@ -527,14 +570,16 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
                     onClick={() => toggleTag(tag.id)}
                     className={`px-3 py-1 rounded-full text-sm border-2 transition-all ${
                       formData.tagIds.includes(tag.id)
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
                     }`}
                     style={{
-                      backgroundColor: formData.tagIds.includes(tag.id) 
-                        ? tag.bgColor + '20' 
-                        : 'transparent',
-                      color: formData.tagIds.includes(tag.id) ? tag.bgColor : '#666',
+                      backgroundColor: formData.tagIds.includes(tag.id)
+                        ? tag.bgColor + "20"
+                        : "transparent",
+                      color: formData.tagIds.includes(tag.id)
+                        ? tag.bgColor
+                        : "#666",
                     }}
                   >
                     {tag.title}
@@ -606,7 +651,7 @@ const MealsByTagModal = ({ isOpen, onClose, tag, onRemoveTag }) => {
 
   const handleRemoveTag = async (mealId) => {
     if (!window.confirm("هل أنت متأكد من إزالة هذا التصنيف من الوجبة؟")) return;
-    
+
     try {
       await tagsService.removeTagFromMeal(mealId, tag.id);
       await loadMeals(); // Refresh the list
@@ -619,11 +664,12 @@ const MealsByTagModal = ({ isOpen, onClose, tag, onRemoveTag }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-800">
-            الوجبات المصنفة تحت: <span style={{ color: tag?.bgColor }}>{tag?.title}</span>
+            الوجبات المصنفة تحت:{" "}
+            <span style={{ color: tag?.bgColor }}>{tag?.title}</span>
           </h3>
           <button
             onClick={onClose}
@@ -652,16 +698,26 @@ const MealsByTagModal = ({ isOpen, onClose, tag, onRemoveTag }) => {
         ) : (
           <div className="space-y-3">
             {meals.map((meal) => (
-              <div key={meal.id} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+              <div
+                key={meal.id}
+                className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg"
+              >
                 <img
-                  src={meal.imageUrl || "/api/placeholder/60/60"}
+                  src={meal.imageUrl || ""}
                   alt={meal.title}
                   className="w-15 h-15 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
                 />
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-800">{meal.title}</h4>
-                  <p className="text-sm text-gray-600 line-clamp-2">{meal.description}</p>
-                  <p className="text-sm font-medium text-green-600">{meal.price} ج.م</p>
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {meal.description}
+                  </p>
+                  <p className="text-sm font-medium text-green-600">
+                    {meal.price} ج.م
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-wrap gap-1">
@@ -717,21 +773,21 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       >
         <FaChevronRight />
       </button>
-      
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
           className={`px-3 py-2 rounded-lg ${
             page === currentPage
-              ? 'bg-blue-600 text-white'
-              : 'border border-gray-300 hover:bg-gray-50'
+              ? "bg-blue-600 text-white"
+              : "border border-gray-300 hover:bg-gray-50"
           }`}
         >
           {page}
         </button>
       ))}
-      
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -745,14 +801,14 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState("tags");
-  
+
   // Tags state
   const [tags, setTags] = useState([]);
   const [filteredTags, setFilteredTags] = useState([]);
   const [tagsLoading, setTagsLoading] = useState(true);
   const [tagsError, setTagsError] = useState("");
   const [tagSearchTerm, setTagSearchTerm] = useState("");
-  
+
   // Meals state
   const [meals, setMeals] = useState([]);
   const [mealsLoading, setMealsLoading] = useState(true);
@@ -770,7 +826,7 @@ const MenuManagement = () => {
     sortBy: "createdAt",
     sortOrder: "DESC",
   });
-  
+
   // Modal states
   const [showTagModal, setShowTagModal] = useState(false);
   const [showMealModal, setShowMealModal] = useState(false);
@@ -794,46 +850,49 @@ const MenuManagement = () => {
     }
   }, []);
 
-  const loadMeals = useCallback(async (page = 1) => {
-    setMealsLoading(true);
-    setMealsError("");
-    try {
-      const params = {
-        page,
-        pageSize: pagination.pageSize,
-        ...filters,
-        search: mealSearchTerm || undefined,
-      };
-      
-      // Clean up empty filters
-      Object.keys(params).forEach(key => {
-        if (params[key] === "" || params[key] === undefined) {
-          delete params[key];
-        }
-      });
+  const loadMeals = useCallback(
+    async (page = 1) => {
+      setMealsLoading(true);
+      setMealsError("");
+      try {
+        const params = {
+          page,
+          pageSize: pagination.pageSize,
+          ...filters,
+          search: mealSearchTerm || undefined,
+        };
 
-      const response = await mealsService.getMeals(params);
-      if (response && response.meals) {
-        setMeals(response.meals);
-        setPagination(prev => ({
-          ...prev,
-          currentPage: response.pagination?.currentPage || page,
-          totalPages: response.pagination?.totalPages || 1,
-        }));
+        // Clean up empty filters
+        Object.keys(params).forEach((key) => {
+          if (params[key] === "" || params[key] === undefined) {
+            delete params[key];
+          }
+        });
+
+        const response = await mealsService.getMeals(params);
+        if (response && response.meals) {
+          setMeals(response.meals);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: response.pagination?.currentPage || page,
+            totalPages: response.pagination?.totalPages || 1,
+          }));
+        }
+      } catch (err) {
+        setMealsError(err.message || "خطأ في تحميل الوجبات");
+      } finally {
+        setMealsLoading(false);
       }
-    } catch (err) {
-      setMealsError(err.message || "خطأ في تحميل الوجبات");
-    } finally {
-      setMealsLoading(false);
-    }
-  }, [filters, mealSearchTerm, pagination.pageSize]);
+    },
+    [filters, mealSearchTerm, pagination.pageSize]
+  );
 
   const filterTags = useCallback(() => {
     if (!tagSearchTerm.trim()) {
       setFilteredTags(tags);
     } else {
       setFilteredTags(
-        tags.filter(tag =>
+        tags.filter((tag) =>
           tag.title.toLowerCase().includes(tagSearchTerm.toLowerCase())
         )
       );
@@ -856,7 +915,7 @@ const MenuManagement = () => {
 
   const handleDeleteTag = async (tag) => {
     if (!window.confirm(`هل أنت متأكد من حذف التصنيف "${tag.title}"؟`)) return;
-    
+
     try {
       await tagsService.deleteTag(tag.id);
       await loadTags();
@@ -867,7 +926,7 @@ const MenuManagement = () => {
 
   const handleDeleteMeal = async (meal) => {
     if (!window.confirm(`هل أنت متأكد من حذف الوجبة "${meal.title}"؟`)) return;
-    
+
     try {
       await mealsService.deleteMeal(meal.id);
       await loadMeals(pagination.currentPage);
@@ -878,7 +937,9 @@ const MenuManagement = () => {
 
   const handleToggleMealAvailability = async (meal) => {
     try {
-      await mealsService.updateMeal(meal.id, { isAvailable: !meal.isAvailable });
+      await mealsService.updateMeal(meal.id, {
+        isAvailable: !meal.isAvailable,
+      });
       await loadMeals(pagination.currentPage);
     } catch (err) {
       setMealsError(err.message || "خطأ في تحديث حالة الوجبة");
@@ -915,7 +976,7 @@ const MenuManagement = () => {
   };
 
   const handleFiltersChange = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   return (
@@ -923,7 +984,9 @@ const MenuManagement = () => {
       <div className="p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">إدارة قوائم الطعام</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            إدارة قوائم الطعام
+          </h1>
           <p className="text-gray-600">إدارة تصنيفات الوجبات والأطباق</p>
         </div>
 
@@ -996,7 +1059,10 @@ const MenuManagement = () => {
             {tagsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="h-24 bg-gray-300 rounded-lg animate-pulse"></div>
+                  <div
+                    key={i}
+                    className="h-24 bg-gray-300 rounded-lg animate-pulse"
+                  ></div>
                 ))}
               </div>
             ) : filteredTags.length === 0 ? (
@@ -1006,10 +1072,9 @@ const MenuManagement = () => {
                   {tagSearchTerm ? "لا توجد نتائج للبحث" : "لا توجد تصنيفات"}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  {tagSearchTerm 
+                  {tagSearchTerm
                     ? `لم يتم العثور على تصنيفات تحتوي على "${tagSearchTerm}"`
-                    : "ابدأ بإضافة تصنيفات جديدة لتنظيم قائمة الطعام"
-                  }
+                    : "ابدأ بإضافة تصنيفات جديدة لتنظيم قائمة الطعام"}
                 </p>
                 {!tagSearchTerm && (
                   <button
@@ -1074,7 +1139,9 @@ const MenuManagement = () => {
               <div className="flex flex-wrap gap-4 items-center">
                 <select
                   value={filters.type}
-                  onChange={(e) => handleFiltersChange({ type: e.target.value })}
+                  onChange={(e) =>
+                    handleFiltersChange({ type: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">جميع الأنواع</option>
@@ -1085,7 +1152,9 @@ const MenuManagement = () => {
 
                 <select
                   value={filters.isAvailable}
-                  onChange={(e) => handleFiltersChange({ isAvailable: e.target.value })}
+                  onChange={(e) =>
+                    handleFiltersChange({ isAvailable: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">جميع الحالات</option>
@@ -1095,7 +1164,9 @@ const MenuManagement = () => {
 
                 <select
                   value={filters.sortBy}
-                  onChange={(e) => handleFiltersChange({ sortBy: e.target.value })}
+                  onChange={(e) =>
+                    handleFiltersChange({ sortBy: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="createdAt">تاريخ الإنشاء</option>
@@ -1105,7 +1176,9 @@ const MenuManagement = () => {
 
                 <select
                   value={filters.sortOrder}
-                  onChange={(e) => handleFiltersChange({ sortOrder: e.target.value })}
+                  onChange={(e) =>
+                    handleFiltersChange({ sortOrder: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="DESC">تنازلي</option>
@@ -1118,7 +1191,10 @@ const MenuManagement = () => {
             {mealsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-32 bg-gray-300 rounded-lg animate-pulse"></div>
+                  <div
+                    key={i}
+                    className="h-32 bg-gray-300 rounded-lg animate-pulse"
+                  ></div>
                 ))}
               </div>
             ) : meals.length === 0 ? (
@@ -1128,10 +1204,9 @@ const MenuManagement = () => {
                   {mealSearchTerm ? "لا توجد نتائج للبحث" : "لا توجد أطباق"}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  {mealSearchTerm 
+                  {mealSearchTerm
                     ? `لم يتم العثور على أطباق تحتوي على "${mealSearchTerm}"`
-                    : "ابدأ بإضافة أطباق جديدة إلى قائمة الطعام"
-                  }
+                    : "ابدأ بإضافة أطباق جديدة إلى قائمة الطعام"}
                 </p>
                 {!mealSearchTerm && (
                   <button
@@ -1155,8 +1230,8 @@ const MenuManagement = () => {
                     />
                   ))}
                 </div>
-                
-                <Pagination 
+
+                <Pagination
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
                   onPageChange={handlePageChange}

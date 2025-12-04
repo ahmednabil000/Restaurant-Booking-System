@@ -3,7 +3,7 @@ import Header from "../ui/Header";
 import Hero from "../ui/Hero";
 import Seperator from "../ui/Seperator";
 import Container from "../ui/Container";
-import MealsCollection from "../features/meals/MealsCollection";
+import TopDemandedMeals from "../features/meals/TopDemandedMeals";
 import Testimonial from "../features/customers/Testimonial";
 import InformationCard from "../ui/InformationCard";
 import { IoMdInformationCircleOutline, IoMdMenu } from "react-icons/io";
@@ -18,11 +18,7 @@ const Home = () => {
       <Container>
         <Seperator />
         <Seperator />
-        <div className="flex justify-center items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-center px-4">
-          اطباقنا المميزة
-        </div>
-        <Seperator />
-        <MealsCollection />
+        <TopDemandedMeals />
         <Seperator />
         <div className="bg-linear-to-br from-slate-50 to-slate-100 w-full py-6 sm:py-8 md:py-10 lg:py-12">
           <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-10">

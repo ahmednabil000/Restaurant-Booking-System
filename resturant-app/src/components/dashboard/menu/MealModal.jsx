@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaSave, FaSpinner } from "react-icons/fa";
 import * as mealsService from "../../../services/mealsService";
+import { API_BASE_URL } from "../../../config/api";
 
 const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     price: "",
-    imageUrl: "",
+    imageFile: null,
     category: "",
     type: "breakfast",
     isAvailable: true,
@@ -15,6 +16,13 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return "";
+    if (imageUrl.startsWith("http")) return imageUrl;
+    return `${API_BASE_URL}${imageUrl}`;
+  };
 
   useEffect(() => {
     if (meal) {
@@ -22,26 +30,55 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
         title: meal.title || "",
         description: meal.description || "",
         price: meal.price || "",
-        imageUrl: meal.imageUrl || "",
+        imageFile: null,
         category: meal.category || "",
         type: meal.type || "breakfast",
         isAvailable: meal.isAvailable !== undefined ? meal.isAvailable : true,
         tagIds: meal.tags ? meal.tags.map((tag) => tag.id) : [],
       });
+      setImagePreview(getImageUrl(meal.imageUrl) || "");
     } else {
       setFormData({
         title: "",
         description: "",
         price: "",
-        imageUrl: "",
+        imageFile: null,
         category: "",
         type: "breakfast",
         isAvailable: true,
         tagIds: [],
       });
+      setImagePreview("");
     }
     setError("");
   }, [meal, isOpen]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (5MB = 5 * 1024 * 1024 bytes)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        setError("يرجى اختيار ملف صورة صحيح");
+        return;
+      }
+
+      setFormData({ ...formData, imageFile: file });
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,10 +95,23 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
     setError("");
 
     try {
-      const submitData = {
-        ...formData,
-        price: parseFloat(formData.price),
-      };
+      const submitData = new FormData();
+      submitData.append("title", formData.title);
+      submitData.append("description", formData.description);
+      submitData.append("price", parseFloat(formData.price));
+      submitData.append("category", formData.category);
+      submitData.append("type", formData.type);
+      submitData.append("isAvailable", formData.isAvailable);
+
+      // Add tagIds as JSON string or individual entries
+      formData.tagIds.forEach((tagId) => {
+        submitData.append("tagIds[]", tagId);
+      });
+
+      // Add image file if selected
+      if (formData.imageFile) {
+        submitData.append("myFile", formData.imageFile);
+      }
 
       if (meal) {
         await mealsService.updateMeal(meal.id, submitData);
@@ -89,7 +139,7 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-800">
@@ -214,17 +264,28 @@ const MealModal = ({ isOpen, onClose, meal, onSave, availableTags = [] }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              رابط الصورة
+              صورة الوجبة
             </label>
             <input
-              type="url"
-              value={formData.imageUrl}
-              onChange={(e) =>
-                setFormData({ ...formData, imageUrl: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://example.com/image.jpg"
+              type="file"
+              name="myFile"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              حد أقصى: 5 ميجابايت. أنواع مدعومة: JPG, PNG, GIF
+            </p>
+
+            {imagePreview && (
+              <div className="mt-3">
+                <img
+                  src={imagePreview}
+                  alt="معاينة الصورة"
+                  className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                />
+              </div>
+            )}
           </div>
 
           {availableTags.length > 0 && (

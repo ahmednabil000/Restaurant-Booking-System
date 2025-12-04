@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import { Button } from "../components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineUser, AiOutlineHome } from "react-icons/ai";
+import { API_BASE_URL } from "../config/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,8 +41,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
-      const authUrl = `${baseUrl.replace(/\/$/, "")}/auth/google`;
+      const authUrl = `${API_BASE_URL.replace(/\/$/, "")}/auth/google`;
 
       // Redirect to backend auth endpoint (full page redirect)
       window.location.href = authUrl;

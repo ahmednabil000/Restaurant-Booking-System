@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
-import { NavLink, Link, useNavigate } from "react-router";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { AiOutlineUser, AiOutlineLogout } from "react-icons/ai";
+import { MdDashboard } from "react-icons/md";
 import useAuthStore from "../store/authStore";
 import { getUserDisplayName } from "../utils/auth";
+import { getStoredToken, isAdmin } from "../utils/jwt";
 import LogoutConfirmation from "../components/LogoutConfirmation";
 import CartIcon from "../components/CartIcon";
 
@@ -15,6 +17,13 @@ const Header = () => {
   const { user, logout, isAuthenticated } = useAuthStore();
   const profileRef = useRef(null);
   const navigate = useNavigate();
+
+  // Check if current user is admin or owner
+  const isUserAdminOrOwner = () => {
+    if (!isAuthenticated || !user) return false;
+    const token = getStoredToken();
+    return token ? isAdmin(token) : false;
+  };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
@@ -117,6 +126,16 @@ const Header = () => {
                         </p>
                         <p className="text-xs text-gray-500">{user.email}</p>
                       </div>
+                      {isUserAdminOrOwner() && (
+                        <Link
+                          to="/dashboard"
+                          className="w-full cursor-pointer text-right px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <MdDashboard className="text-lg" />
+                          لوحة التحكم
+                        </Link>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="w-full cursor-pointer text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -199,6 +218,16 @@ const Header = () => {
                       </div>
                     </div>
                   </div>
+                  {isUserAdminOrOwner() && (
+                    <Link
+                      to="/dashboard"
+                      className="w-full text-right px-4 sm:px-6 py-2.5 sm:py-3 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <MdDashboard className="text-lg" />
+                      لوحة التحكم
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout();

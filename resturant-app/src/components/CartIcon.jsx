@@ -1,14 +1,16 @@
 import React from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { Link } from "react-router";
-import useCartStore from "../store/cartStore";
+import { Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import { useCartQuery } from "../hooks/useCart";
 
 const CartIcon = () => {
   const { isAuthenticated } = useAuthStore();
-  const { getTotalItems } = useCartStore();
+  const { data: cartResponse } = useCartQuery();
 
-  const totalItems = getTotalItems();
+  // Extract item count from API response
+  const cartData = cartResponse?.success ? cartResponse.cart : null;
+  const totalItems = parseInt(cartData?.itemCount) || 0;
 
   // Only show cart icon if user is authenticated
   if (!isAuthenticated) {

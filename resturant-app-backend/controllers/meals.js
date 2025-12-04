@@ -1,7 +1,8 @@
 const db = require("../database/sequalize");
-const { Meal, Tag, MealTag } = require("../models/associations");
+const { Meal, Tag, MealTag, CartItem } = require("../models/associations");
 const { Op } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
+const { Connection } = require("pg");
 
 exports.getMealById = async (req, res) => {
   try {
@@ -158,12 +159,14 @@ exports.addMeal = async (req, res) => {
       title,
       description,
       price,
-      imageUrl,
       category,
       type,
       isAvailable = true,
       tagIds = [],
     } = req.body;
+
+    console.log("Request file:", req.file);
+    console.log("Request body:", req.body);
 
     // Validate required fields
     if (!title || !description || !price || !category || !type) {
@@ -183,6 +186,7 @@ exports.addMeal = async (req, res) => {
 
     // Create the meal
     const mealId = uuidv4();
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
     const meal = await Meal.create({
       id: mealId,
       title,
@@ -281,7 +285,11 @@ exports.updateMealById = async (req, res) => {
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (price !== undefined) updateData.price = parseFloat(price);
-    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (req.file) {
+      updateData.imageUrl = `/uploads/${req.file.filename}`;
+    } else if (imageUrl !== undefined) {
+      updateData.imageUrl = imageUrl;
+    }
     if (category !== undefined) updateData.category = category;
     if (type !== undefined) updateData.type = type;
     if (isAvailable !== undefined) updateData.isAvailable = isAvailable;
@@ -503,6 +511,107 @@ exports.searchMeals = async (req, res) => {
     });
   } catch (error) {
     console.error("Error searching meals:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+exports.getTopDemandedMeals = async (req, res) => {
+  try {
+    // Get current date and calculate the start of the month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59
+    );
+
+    // Query to get top 3 most demanded meals for the current month
+    const topMeals = await Meal.findAll({
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "price",
+        "imageUrl",
+        "category",
+        "type",
+        "isAvailable",
+        [db.fn("SUM", db.col("cartItems.quantity")), "totalDemand"],
+        [db.fn("COUNT", db.col("cartItems.id")), "orderCount"],
+      ],
+      include: [
+        {
+          model: CartItem,
+          as: "cartItems",
+          where: {
+            createdAt: {
+              [Op.between]: [startOfMonth, endOfMonth],
+            },
+          },
+          attributes: [],
+          required: true,
+        },
+        {
+          model: Tag,
+          as: "tags",
+          attributes: ["id", "title", "bgColor", "titleColor"],
+          through: { attributes: [] },
+        },
+      ],
+      group: [
+        "Meal.id",
+        "tags.id",
+        "tags.title",
+        "tags.bgColor",
+        "tags.titleColor",
+        "tags->MealTag.MealId",
+        "tags->MealTag.TagId",
+      ],
+      having: db.where(db.fn("SUM", db.col("cartItems.quantity")), {
+        [Op.gt]: 0,
+      }),
+      order: [
+        [db.fn("SUM", db.col("cartItems.quantity")), "DESC"],
+        [db.fn("COUNT", db.col("cartItems.id")), "DESC"],
+      ],
+      limit: 3,
+      subQuery: false,
+    });
+
+    // Format the response
+    const formattedMeals = topMeals.map((meal) => {
+      const mealData = meal.toJSON();
+      return {
+        ...mealData,
+        totalDemand: parseInt(mealData.totalDemand) || 0,
+        orderCount: parseInt(mealData.orderCount) || 0,
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        meals: formattedMeals,
+        period: {
+          month: now.getMonth() + 1,
+          year: now.getFullYear(),
+          monthName: now.toLocaleString("default", { month: "long" }),
+        },
+      },
+      message: `Top 3 most demanded meals for ${now.toLocaleString("default", {
+        month: "long",
+      })} ${now.getFullYear()}`,
+    });
+  } catch (error) {
+    console.error("Error getting top demanded meals:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

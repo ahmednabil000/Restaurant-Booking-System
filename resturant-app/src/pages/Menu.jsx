@@ -4,6 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import MealCard from "../features/meals/LongMealCard";
 import FilterChips from "../features/meals/MealFilterChips";
 import { useMealsQuery } from "../hooks/useMeals";
+import { getFullImageUrl } from "../services/mealsService";
 import Pagination from "../components/Pagination";
 import menuPageImg from "../assets/menu-page-meal.jpg";
 import Seperator from "../ui/Seperator";
@@ -172,21 +173,22 @@ const MenuPage = () => {
           <>
             {meals.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 auto-rows-fr">
                   {meals.map((meal) => {
                     // Transform API meal data to match component expectations
                     const transformedMeal = {
                       id: meal.id,
                       name: meal.title,
                       price: parseFloat(meal.price),
+                      imageUrl: meal.imageUrl,
                       image:
-                        meal.imageUrl ||
+                        getFullImageUrl(meal.imageUrl) ||
                         `https://via.placeholder.com/300x200?text=${encodeURIComponent(
                           meal.title
                         )}`,
                       description: meal.description,
                       ingredients: [],
-                      tags: meal.tags || [],
+                      tags: Array.isArray(meal.tags) ? meal.tags : [],
                       category: meal.category,
                     };
 
@@ -222,9 +224,10 @@ const MenuPage = () => {
 
         {/* Loading overlay for page changes */}
         {isFetching && !isLoading && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-10 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-4 shadow-lg">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e26136] mx-auto"></div>
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#e26136] mx-auto mb-4"></div>
+              <p className="text-gray-600">جاري تحديث النتائج...</p>
             </div>
           </div>
         )}

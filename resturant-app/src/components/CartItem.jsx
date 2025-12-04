@@ -4,6 +4,7 @@ import {
   useRemoveFromCartMutation,
   useUpdateCartItemMutation,
 } from "../hooks/useCart";
+import { getFullImageUrl } from "../services/mealsService";
 
 const CartItem = ({ item }) => {
   const removeFromCartMutation = useRemoveFromCartMutation();
@@ -33,7 +34,7 @@ const CartItem = ({ item }) => {
           {item.meal?.imageUrl && (
             <div className="shrink-0">
               <img
-                src={item.meal.imageUrl}
+                src={getFullImageUrl(item.meal.imageUrl) || item.meal.imageUrl}
                 alt={item.meal.title}
                 className="w-16 h-16 object-cover rounded-lg"
               />
@@ -110,7 +111,7 @@ const CartItem = ({ item }) => {
         {item.meal?.imageUrl && (
           <div className="shrink-0">
             <img
-              src={item.meal.imageUrl}
+              src={getFullImageUrl(item.meal.imageUrl) || item.meal.imageUrl}
               alt={item.meal.title}
               className="w-20 h-20 object-cover rounded-lg"
             />

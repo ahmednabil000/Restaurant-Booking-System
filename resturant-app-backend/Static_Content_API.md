@@ -1,161 +1,11 @@
 # Static Content API
 
-This document describes the Static Pages and Branches endpoints for public and admin usage.
+This document describes the Branches endpoints for public and admin usage.
 
 **Notes**
 
 - Admin endpoints require JWT authentication and admin role: middleware `authenticateJWT` + `requireRole(["admin"])`.
-- `featuredItems`, `featuredReviews`, `chefs`, `openingHours`, and `meta` fields are stored as JSON in the database.
-
----
-
-## Pages (Static content)
-
-### Public
-
-- **GET** `/pages/:slug`
-  - Description: Retrieve a page by its `slug` (e.g. `home`, `about`).
-  - Parameters: `slug` (path)
-  - Response: 200
-    ```json
-    {
-      "id": 1,
-      "slug": "home",
-      "title": "Welcome",
-      "heroImage": "https://.../hero.jpg",
-      "content": "<p>HTML or markdown content</p>",
-      "featuredItems": [{ "mealId": 12, "order": 1 }],
-      "featuredReviews": [{ "author": "Aya", "text": "Great!", "rating": 5 }],
-      "chefs": [{ "name": "Chef Ahmed", "bio": "...", "photo": "..." }],
-      "meta": { "seoTitle": "...", "description": "..." },
-      "isActive": true,
-      "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-02T00:00:00.000Z"
-    }
-    ```
-
-### Admin
-
-- **GET** `/pages`
-
-  - Description: List all pages (admin). Supports optional query params `?active=true|false`, `?page=1&limit=20`.
-  - Response: 200
-    ```json
-    [{ "id": 1, "slug": "home", "title": "Home", "isActive": true }, ...]
-    ```
-
-- **POST** `/pages`
-
-  - Description: Create a new static page (admin only).
-  - Body (application/json):
-    ```json
-    {
-      "slug": "about",
-      "title": "About Us",
-      "heroImage": "https://.../about-hero.jpg",
-      "content": "<p>About content</p>",
-      "featuredItems": [{ "mealId": 5, "order": 1 }],
-      "featuredReviews": [{ "author": "Omar", "text": "Awesome", "rating": 5 }],
-      "chefs": [{ "name": "Chef Name", "bio": "...", "photo": "..." }],
-      "meta": { "seoTitle": "About", "description": "About description" },
-      "isActive": true
-    }
-    ```
-  - Response: 201
-    ```json
-    {
-      "message": "Page created",
-      "page": {
-        /* page object */
-      }
-    }
-    ```
-
-- **PUT** `/pages/:id`
-
-  - Description: Update page fields (admin).
-  - Body: same as POST (only include fields to update)
-  - Response: 200
-    ```json
-    {
-      "message": "Page updated",
-      "page": {
-        /* updated page */
-      }
-    }
-    ```
-
-- **DELETE** `/pages/:id`
-
-  - Description: Delete a page (admin).
-  - Response: 200
-    ```json
-    { "message": "Page deleted" }
-    ```
-
-- **PUT** `/pages/:id/hero`
-
-  - Description: Update hero section fields for a page (admin).
-  - Body (application/json):
-    ```json
-    {
-      "heroImage": "https://.../new-hero.jpg",
-      "heroTitle": "New title",
-      "heroSubtitle": "Sub text",
-      "heroCTA": { "text": "Order Now", "url": "/menu" }
-    }
-    ```
-  - Response: 200
-    ```json
-    {
-      "message": "Hero updated",
-      "page": {
-        /* page */
-      }
-    }
-    ```
-
-- **PUT** `/pages/:id/featured-items`
-
-  - Description: Set or update the featured items block (admin).
-  - Body: `featuredItems` is stored as JSON and can be an array of meal ids or objects with ordering.
-    ```json
-    {
-      "featuredItems": [
-        { "mealId": 12, "order": 1 },
-        { "mealId": 7, "order": 2 }
-      ]
-    }
-    ```
-  - Response: 200
-    ```json
-    {
-      "message": "Featured items updated",
-      "page": {
-        /* page */
-      }
-    }
-    ```
-
-- **PUT** `/pages/:id/featured-reviews`
-  - Description: Set or update featured reviews shown on the page (admin).
-  - Body:
-    ```json
-    {
-      "featuredReviews": [
-        { "author": "Mona", "text": "Excellent", "rating": 5 }
-      ]
-    }
-    ```
-  - Response: 200
-    ```json
-    {
-      "message": "Featured reviews updated",
-      "page": {
-        /* page */
-      }
-    }
-    ```
+- `openingHours` and `meta` fields are stored as JSON in the database.
 
 ---
 
@@ -392,25 +242,6 @@ This document describes the Static Pages and Branches endpoints for public and a
 
 ## Data Models (quick reference)
 
-- Page
-
-  ```json
-  {
-    "id": 1,
-    "slug": "home",
-    "title": "Home",
-    "heroImage": "string",
-    "content": "string",
-    "featuredItems": [],
-    "featuredReviews": [],
-    "chefs": [],
-    "meta": {},
-    "isActive": true,
-    "createdAt": "ISO date",
-    "updatedAt": "ISO date"
-  }
-  ```
-
 - Branch
   ```json
   {
@@ -418,6 +249,13 @@ This document describes the Static Pages and Branches endpoints for public and a
     "name": "Downtown",
     "address": "string",
     "phone": "string",
+    "latitude": 24.7136,
+    "longitude": 46.6753,
+    "city": "string",
+    "state": "string",
+    "country": "string",
+    "zipCode": "string",
+    "landmark": "string",
     "openingHours": { "monday": { "open": "09:00", "close": "22:00" } },
     "isActive": true,
     "meta": {},

@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { API_BASE_URL } from "../config/api";
+const API_URL = API_BASE_URL;
 
 // Helper function to get JWT token from localStorage
 const getAuthToken = () => {

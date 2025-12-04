@@ -1,6 +1,6 @@
 import React from "react";
 import { handleLogout } from "../utils/auth";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 
 const UserProfile = () => {

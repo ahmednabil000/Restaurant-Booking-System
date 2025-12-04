@@ -1,21 +1,36 @@
-import React from "react";
-import { Link } from "react-router";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { AiOutlineShoppingCart, AiOutlineArrowRight } from "react-icons/ai";
 import useAuthStore from "../store/authStore";
+import useRestaurantStore from "../store/restaurantStore";
 import { useCartQuery, useClearCartMutation } from "../hooks/useCart";
 import CartItem from "../components/CartItem";
 import Container from "../ui/Container";
+import Modal from "../components/ui/Modal";
 
 const Cart = () => {
   const { isAuthenticated } = useAuthStore();
+  const { restaurant, fetchRestaurantDetails } = useRestaurantStore();
   const { data: cartResponse, isLoading, error } = useCartQuery();
   const clearCartMutation = useClearCartMutation();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Fetch restaurant details if not already loaded
+  React.useEffect(() => {
+    if (!restaurant) {
+      fetchRestaurantDetails();
+    }
+  }, [restaurant, fetchRestaurantDetails]);
 
   // Extract cart data from API response
   const cartData = cartResponse?.success ? cartResponse.cart : null;
   const cartItems = cartData?.items || [];
   const totalAmount = parseFloat(cartData?.totalAmount) || 0;
   const itemCount = parseInt(cartData?.itemCount) || 0;
+
+  // Get service fees from restaurant details
+  const serviceFees =
+    +restaurant?.data?.serviceFees || +restaurant?.serviceFees || 5.0;
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -108,7 +123,7 @@ const Cart = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-h-0">
             <div className="space-y-4">
               {cartItems.map((item) => (
                 <CartItem key={item.id} item={item} />
@@ -118,20 +133,7 @@ const Cart = () => {
             {/* Clear Cart Button */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <button
-                onClick={() => {
-                  if (window.confirm("هل أنت متأكد من إفراغ السلة؟")) {
-                    clearCartMutation.mutate(undefined, {
-                      onSuccess: () => {
-                        // Optional: Show success message or handle success
-                        console.log("تم إفراغ السلة بنجاح");
-                      },
-                      onError: (error) => {
-                        // Show error message
-                        alert(`خطأ في إفراغ السلة: ${error.message}`);
-                      },
-                    });
-                  }
-                }}
+                onClick={() => setShowClearConfirm(true)}
                 disabled={clearCartMutation.isLoading}
                 className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
@@ -149,7 +151,7 @@ const Cart = () => {
 
           {/* Cart Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-50 rounded-lg p-6 sticky top-4">
+            <div className="bg-gray-50 rounded-lg p-6 sticky top-24 z-10 shadow-lg border border-gray-200">
               <h3 className="text-xl font-bold text-gray-800 mb-4">
                 ملخص الطلب
               </h3>
@@ -163,13 +165,15 @@ const Cart = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">رسوم الخدمة</span>
-                  <span className="font-semibold">300.00 ج.م</span>
+                  <span className="font-semibold">
+                    {serviceFees.toFixed(2)} ج.م
+                  </span>
                 </div>
                 <div className="border-t border-gray-300 pt-3">
                   <div className="flex justify-between text-lg font-bold">
                     <span>المجموع الكلي</span>
                     <span className="text-[#e26136]">
-                      {(totalAmount + 5).toFixed(2)}ج.م
+                      {(totalAmount + serviceFees).toFixed(2)} ج.م
                     </span>
                   </div>
                 </div>
@@ -191,6 +195,56 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* Clear Cart Confirmation Modal */}
+      <Modal
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        title="تأكيد إفراغ السلة"
+        maxWidth="max-w-md"
+        footerContent={
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setShowClearConfirm(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={() => {
+                clearCartMutation.mutate(undefined, {
+                  onSuccess: () => {
+                    setShowClearConfirm(false);
+                    console.log("تم إفراغ السلة بنجاح");
+                  },
+                  onError: (error) => {
+                    setShowClearConfirm(false);
+                    alert(`خطأ في إفراغ السلة: ${error.message}`);
+                  },
+                });
+              }}
+              disabled={clearCartMutation.isLoading}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {clearCartMutation.isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  جاري الحذف...
+                </>
+              ) : (
+                "إفراغ السلة"
+              )}
+            </button>
+          </div>
+        }
+      >
+        <div className="p-6">
+          <p className="text-gray-600 leading-relaxed">
+            هل أنت متأكد من رغبتك في إفراغ السلة؟ سيتم حذف جميع العناصر ولا يمكن
+            التراجع عن هذا الإجراء.
+          </p>
+        </div>
+      </Modal>
     </Container>
   );
 };

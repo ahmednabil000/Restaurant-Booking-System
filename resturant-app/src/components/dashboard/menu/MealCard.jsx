@@ -1,12 +1,18 @@
 import React from "react";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { API_BASE_URL } from "../../../config/api";
 
 const MealCard = ({ meal, onEdit, onDelete, onToggleAvailability }) => {
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return "/api/placeholder/80/80";
+    if (imageUrl.startsWith("http")) return imageUrl;
+    return `${API_BASE_URL}${imageUrl}`;
+  };
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
       <div className="flex gap-4">
         <img
-          src={meal.imageUrl || "/api/placeholder/80/80"}
+          src={getImageUrl(meal.imageUrl)}
           alt={meal.title}
           className="w-20 h-20 object-cover rounded-lg"
         />

@@ -1,5 +1,5 @@
 // Restaurant API service functions
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { API_BASE_URL } from "../config/api";
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -105,6 +105,156 @@ export const getRestaurantContact = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching restaurant contact:", error);
+    throw error;
+  }
+};
+
+// Update basic restaurant information
+export const updateBasicInfo = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant/basic-info`, {
+      method: "PATCH",
+      headers: buildHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating basic info:", error);
+    throw error;
+  }
+};
+
+// Update contact information
+export const updateContactInfo = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant/contact-info`, {
+      method: "PATCH",
+      headers: buildHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating contact info:", error);
+    throw error;
+  }
+};
+
+// Update reservation settings
+export const updateReservationSettings = async (data) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/restaurant/reservation-settings`,
+      {
+        method: "PATCH",
+        headers: buildHeaders(true),
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating reservation settings:", error);
+    throw error;
+  }
+};
+
+// Update operating hours
+export const updateOperatingHours = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant/operating-hours`, {
+      method: "PATCH",
+      headers: buildHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating operating hours:", error);
+    throw error;
+  }
+};
+
+// Update tables count
+export const updateTablesCount = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant/tables`, {
+      method: "PUT",
+      headers: buildHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating tables count:", error);
+    throw error;
+  }
+};
+
+// Update full restaurant information
+export const updateFullRestaurant = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant`, {
+      method: "PUT",
+      headers: buildHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating full restaurant:", error);
+    throw error;
+  }
+};
+
+// Update social media URLs
+export const updateSocialMedia = async (data) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant/social-media`, {
+      method: "PATCH",
+      headers: buildHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`خطأ في الخادم: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating social media:", error);
     throw error;
   }
 };

@@ -1,5 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMeals, getMealsByTags } from "../services/mealsService";
+import {
+  getMeals,
+  getMealsByTags,
+  getTopDemandedMeals,
+} from "../services/mealsService";
 
 // Query keys for meals
 export const mealsKeys = {
@@ -12,6 +16,7 @@ export const mealsKeys = {
     tagIds.sort().join(","),
     filters,
   ],
+  topDemanded: (limit) => [...mealsKeys.all, "topDemanded", limit],
 };
 
 // Custom hook to fetch meals with pagination and filters
@@ -57,6 +62,16 @@ export const useMealsQuery = ({
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     placeholderData: (previousData) => previousData, // Keep previous data while loading new data
+    retry: 2,
+  });
+};
+
+// Custom hook to fetch top demanded meals
+export const useTopDemandedMealsQuery = (limit = 3) => {
+  return useQuery({
+    queryKey: mealsKeys.topDemanded(limit),
+    queryFn: () => getTopDemandedMeals(limit),
+    staleTime: 10 * 60 * 1000, // 10 minutes - top demanded meals change less frequently
     retry: 2,
   });
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AiOutlineCheckCircle, AiOutlineHome } from "react-icons/ai";
 import useAuthStore from "../store/authStore";
 import { getUserDisplayName } from "../utils/auth";

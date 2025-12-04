@@ -3,7 +3,8 @@ const cartController = require("../controllers/cart");
 const { authenticateJWT } = require("../middlewares/auth");
 const router = express.Router();
 
-// All cart routes require authentication
+// ===== AUTHENTICATED USER ROUTES =====
+// All cart routes require user authentication
 router.use(authenticateJWT);
 
 // Add item to cart

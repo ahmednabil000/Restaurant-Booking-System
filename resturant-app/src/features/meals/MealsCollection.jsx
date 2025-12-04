@@ -1,6 +1,7 @@
 import React from "react";
 import ShortMealCard from "./ShortMealCard";
 import { useMealsQuery } from "../../hooks/useMeals";
+import { getFullImageUrl } from "../../services/mealsService";
 
 const MealsCollection = ({ meals: propMeals, maxItems = 4 }) => {
   // Use API data if no meals are passed as props
@@ -34,8 +35,8 @@ const MealsCollection = ({ meals: propMeals, maxItems = 4 }) => {
           name: meal.title || meal.name,
           price: parseFloat(meal.price),
           image:
-            meal.imageUrl ||
-            meal.image ||
+            getFullImageUrl(meal.imageUrl) ||
+            getFullImageUrl(meal.image) ||
             `https://via.placeholder.com/300x200?text=${encodeURIComponent(
               meal.title || meal.name
             )}`,

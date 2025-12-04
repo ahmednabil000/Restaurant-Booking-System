@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const cors = require("cors");
@@ -13,14 +14,9 @@ const cartRoutes = require("./routes/cartRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const resturantRoutes = require("./routes/resturantRoutes");
 const tagsRoutes = require("./routes/tagsRoutes");
-const staticPagesRoutes = require("./routes/staticPagesRoutes");
 const branchesRoutes = require("./routes/branchesRoutes");
-const {
-  createArabicMockData,
-  createRestaurantMockData,
-  createMockMealTagRelationships,
-} = require("./mockData");
-const { updateMealsWithImages } = require("./updateMealImages");
+const usersRoutes = require("./routes/usersRoutes");
+const upload = require("./middlewares/multer");
 
 const app = express();
 
@@ -56,6 +52,7 @@ app.use(function (req, res, next) {
   next();
 });
 app.use(express.static(__dirname)); // Serve static files for testing
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
@@ -66,8 +63,8 @@ app.use(mealsRoutes);
 app.use(reservationRoutes);
 app.use(resturantRoutes);
 app.use(cartRoutes);
-app.use(staticPagesRoutes);
 app.use(branchesRoutes);
+app.use("/api", usersRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({
@@ -80,6 +77,15 @@ async function startServer() {
     console.log("Starting server...");
     await db.authenticate();
     console.log("Database authenticated successfully.");
+
+    // Drop MealTags table if it exists to fix schema conflicts
+    try {
+      await db.getQueryInterface().dropTable("MealTags");
+      console.log("Dropped existing MealTags table to fix schema.");
+    } catch (dropError) {
+      // Table might not exist, that's okay
+      console.log("MealTags table didn't exist or couldn't be dropped.");
+    }
 
     await db.sync({ alter: true }); // Preserve existing data
     console.log("Database synchronized successfully.");
@@ -96,14 +102,10 @@ async function startServer() {
     );
     console.log("Updated existing users with default fullName.");
 
-    // Create Arabic mock data (temporary)
-    await createArabicMockData();
-
-    // Create restaurant mock data
-    await createRestaurantMockData();
-    await createMockMealTagRelationships();
-    // Update existing meals with image URLs
-    await updateMealsWithImages();
+    // Initialize system roles
+    const { initializeSystemRoles } = require("./controllers/roles");
+    await initializeSystemRoles();
+    console.log("System roles initialized successfully.");
 
     app.listen(8080, () => {
       console.log("Server is running on port 8080");

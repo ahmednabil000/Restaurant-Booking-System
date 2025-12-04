@@ -1,5 +1,5 @@
 // Meals API service functions
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { API_BASE_URL } from "../config/api";
 
 const getAuthToken = () => {
   return (
@@ -18,6 +18,41 @@ const buildHeaders = (includeAuth = true) => {
   }
 
   return headers;
+};
+
+// Helper function to construct full image URLs
+export const getFullImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith("http")) return imageUrl;
+  return `${API_BASE_URL}${imageUrl}`;
+};
+
+// Get top demanded meals
+export const getTopDemandedMeals = async (limit = 3) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/meals/top-demanded?limit=${limit}`,
+      {
+        method: "GET",
+        headers: buildHeaders(false), // Public endpoint
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    // Return the meals array and additional metadata
+    return {
+      meals: result.data?.meals || [],
+      period: result.data?.period || null,
+      message: result.message || "",
+    };
+  } catch (error) {
+    console.error("Error fetching top demanded meals:", error);
+    throw error;
+  }
 };
 
 // Get meals with pagination and filters
@@ -200,10 +235,18 @@ export const getMealById = async (mealId) => {
 // Create new meal
 export const createMeal = async (mealData) => {
   try {
+    const isFormData = mealData instanceof FormData;
+    const headers = buildHeaders(true);
+
+    // Remove Content-Type for FormData to let browser set boundary
+    if (isFormData) {
+      delete headers["Content-Type"];
+    }
+
     const response = await fetch(`${API_BASE_URL}/meals`, {
       method: "POST",
-      headers: buildHeaders(true), // Admin required
-      body: JSON.stringify(mealData),
+      headers,
+      body: isFormData ? mealData : JSON.stringify(mealData),
     });
 
     if (!response.ok) {
@@ -222,10 +265,18 @@ export const createMeal = async (mealData) => {
 // Update meal
 export const updateMeal = async (mealId, mealData) => {
   try {
+    const isFormData = mealData instanceof FormData;
+    const headers = buildHeaders(true);
+
+    // Remove Content-Type for FormData to let browser set boundary
+    if (isFormData) {
+      delete headers["Content-Type"];
+    }
+
     const response = await fetch(`${API_BASE_URL}/meals/${mealId}`, {
       method: "PUT",
-      headers: buildHeaders(true), // Admin required
-      body: JSON.stringify(mealData),
+      headers,
+      body: isFormData ? mealData : JSON.stringify(mealData),
     });
 
     if (!response.ok) {
@@ -270,4 +321,5 @@ export default {
   createMeal,
   updateMeal,
   deleteMeal,
+  getTopDemandedMeals,
 };

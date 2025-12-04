@@ -3,6 +3,9 @@ const reservationController = require("../controllers/reservation");
 const authMiddleware = require("../middlewares/auth");
 const router = express.Router();
 
+// ===== AUTHENTICATED USER ROUTES =====
+// Routes that require user authentication but no specific role
+
 // Protected customer routes (require authentication)
 router.post(
   "/reservations",
@@ -22,7 +25,8 @@ router.put(
   reservationController.cancelMyReservation
 );
 
-// Public routes
+// ===== PUBLIC ROUTES =====
+// No authentication required
 router.get(
   "/reservations/available",
   reservationController.getAvailableTablesForDate
@@ -40,53 +44,56 @@ router.get(
   reservationController.cancelReservationByToken
 );
 
+// ===== ADMIN-ONLY ROUTES =====
+// All routes below require admin or owner role authentication
+
 // Admin routes for reservation management
 router.get(
   "/reservations",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.getAllReservations
 );
 
 router.put(
   "/reservations/:id/confirm",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.confirmReservation
 );
 
 router.put(
   "/reservations/:id/reject",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.rejectReservation
 );
 
 router.put(
   "/reservations/:id/cancel",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.cancelReservation
 );
 
 router.put(
   "/reservations/:id",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.updateReservation
 );
 
 router.put(
   "/reservations/:id/complete",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.completeReservation
 );
 
 router.put(
   "/reservations/:id/no-show",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.markNoShow
 );
 
@@ -94,7 +101,7 @@ router.put(
 router.put(
   "/reservations/bulk/status",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.bulkUpdateReservationStatus
 );
 
@@ -102,14 +109,14 @@ router.put(
 router.post(
   "/reservations/:id/send-confirmation",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.sendConfirmationNotification
 );
 
 router.post(
   "/reservations/:id/send-rejection",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.sendRejectionNotification
 );
 
@@ -117,14 +124,14 @@ router.post(
 router.get(
   "/reservation-settings",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.getReservationSettings
 );
 
 router.put(
   "/reservation-settings",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.updateReservationSettings
 );
 
@@ -136,31 +143,34 @@ router.get(
 router.put(
   "/blocked-dates",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.manageBlockedDates
 );
 
 router.get("/blocked-dates", reservationController.getBlockedDates);
 
+// ===== ADMIN-ONLY ROUTES =====
+// All routes below require admin or owner role authentication
+
 // Analytics endpoints (Admin only)
 router.get(
   "/analytics/reservation-stats",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.getReservationStats
 );
 
 router.get(
   "/analytics/most-demanded-meals",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.getMostDemandedMeals
 );
 
 router.get(
   "/analytics/recent-customers",
   authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin"]),
+  authMiddleware.requireRole(["admin", "owner"]),
   reservationController.getRecentCustomerActivity
 );
 
