@@ -9,7 +9,7 @@ import TimePicker from "../../components/ui/TimePicker";
 import useRestaurantStore from "../../store/restaurantStore";
 import { getAvailableTables } from "../../services/reservationService";
 import { useReserveTableMutation } from "../../hooks/useReservation";
-import { useCartQuery } from "../../hooks/useCart";
+import { useCartQuery, useClearCartMutation } from "../../hooks/useCart";
 
 const ReservationForm = () => {
   const [formData, setFormData] = useState({
@@ -31,6 +31,7 @@ const ReservationForm = () => {
 
   const { fetchRestaurantDetails } = useRestaurantStore();
   const reserveTableMutation = useReserveTableMutation();
+  const clearCartMutation = useClearCartMutation();
   const navigate = useNavigate();
   const stripe = useStripe();
   const { data: cartResponse } = useCartQuery();
@@ -226,6 +227,9 @@ const ReservationForm = () => {
 
       reserveTableMutation.mutate(reservationData, {
         onSuccess: () => {
+          // Clear the cart
+          clearCartMutation.mutate();
+
           // Remove any existing notifications
           const existingNotification = document.getElementById(
             "reservation-cash-success-notification"
@@ -330,15 +334,25 @@ const ReservationForm = () => {
                 </div>
               </div>
 
-              <p style="color: #6b7280; font-size: 13px; text-align: center; margin: 0 0 20px 0;">سيتم التواصل معك عبر رقم الهاتف لتأكيد الحجز</p>
+              <div style="background: #d1fae5; border-right: 4px solid #10b981; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="20" height="20" fill="#059669" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <p style="color: #065f46; margin: 0; font-size: 13px; font-weight: 600;">تم مسح السلة بنجاح</p>
+                </div>
+              </div>
+
+              <p style="color: #6b7280; font-size: 13px; text-align: center; margin: 0 0 8px 0;">سيتم التواصل معك عبر رقم الهاتف لتأكيد الحجز</p>
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0 0 20px 0;">سيتم توجيهك للصفحة الرئيسية خلال 3 ثوانٍ...</p>
 
               <button 
-                onclick="this.closest('[id=reservation-cash-success-notification]').style.animation='fadeOutScale 0.3s ease-out forwards'; setTimeout(() => { this.closest('[id=reservation-cash-success-notification]').remove(); window.location.href='/'; }, 300);"
+                onclick="this.closest('[id=reservation-cash-success-notification]').style.animation='fadeOutScale 0.3s ease-out forwards'; document.getElementById('notification-backdrop').style.opacity='0'; setTimeout(() => { this.closest('[id=reservation-cash-success-notification]').remove(); document.getElementById('notification-backdrop')?.remove(); window.location.href='/'; }, 300);"
                 style="width: 100%; padding: 12px; background: #e26136; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
                 onmouseover="this.style.background='#cd4f25'"
                 onmouseout="this.style.background='#e26136'"
               >
-                العودة للرئيسية
+                العودة للرئيسية الآن
               </button>
             </div>
           `;
@@ -369,7 +383,7 @@ const ReservationForm = () => {
           // Invalidate cart query to refresh cart count
           queryClient.invalidateQueries(["cart"]);
 
-          // Auto close after 8 seconds
+          // Auto close and redirect after 3 seconds
           setTimeout(() => {
             notification.style.animation =
               "fadeOutScale 0.3s ease-out forwards";
@@ -380,7 +394,7 @@ const ReservationForm = () => {
               if (backdrop.parentNode) backdrop.remove();
               navigate("/");
             }, 300);
-          }, 8000);
+          }, 3000);
         },
         onError: (error) => {
           console.error("Reservation failed:", error);
