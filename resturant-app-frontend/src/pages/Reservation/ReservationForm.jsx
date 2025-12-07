@@ -213,6 +213,8 @@ const ReservationForm = () => {
 
     // If payment method is cash, save reservation directly
     if (paymentMethod === "cash") {
+      console.log("Processing cash payment reservation...");
+      
       const reservationData = {
         name: formData.name,
         phone: formData.phone,
@@ -224,11 +226,22 @@ const ReservationForm = () => {
         notes: formData.notes,
         paymentMethod: "cash",
       };
+      
+      console.log("Reservation data:", reservationData);
 
       reserveTableMutation.mutate(reservationData, {
-        onSuccess: () => {
+        onSuccess: (reservationResponse) => {
+          console.log("Reservation successful:", reservationResponse);
+          
           // Clear the cart
-          clearCartMutation.mutate();
+          clearCartMutation.mutate(undefined, {
+            onSuccess: () => {
+              console.log("Cart cleared successfully");
+            },
+            onError: (error) => {
+              console.error("Failed to clear cart:", error);
+            }
+          });
 
           // Remove any existing notifications
           const existingNotification = document.getElementById(
@@ -236,6 +249,11 @@ const ReservationForm = () => {
           );
           if (existingNotification) {
             existingNotification.remove();
+          }
+          
+          const existingBackdrop = document.getElementById("notification-backdrop");
+          if (existingBackdrop) {
+            existingBackdrop.remove();
           }
 
           // Show enhanced success notification
@@ -374,6 +392,8 @@ const ReservationForm = () => {
 
           document.body.appendChild(backdrop);
           document.body.appendChild(notification);
+          
+          console.log("Notification and backdrop appended to DOM");
 
           // Fade in backdrop
           requestAnimationFrame(() => {
@@ -385,6 +405,7 @@ const ReservationForm = () => {
 
           // Auto close and redirect after 3 seconds
           setTimeout(() => {
+            console.log("Starting auto-close and redirect...");
             notification.style.animation =
               "fadeOutScale 0.3s ease-out forwards";
             backdrop.style.opacity = "0";
@@ -392,13 +413,23 @@ const ReservationForm = () => {
             setTimeout(() => {
               if (notification.parentNode) notification.remove();
               if (backdrop.parentNode) backdrop.remove();
+              console.log("Redirecting to home page...");
               navigate("/");
             }, 300);
           }, 3000);
         },
         onError: (error) => {
           console.error("Reservation failed:", error);
-          alert("فشل في حجز الطاولة. حاول مرة أخرى.");
+          
+          // Remove any existing error notifications
+          const existingError = document.getElementById("reservation-error-notification");
+          if (existingError) {
+            existingError.remove();
+          }
+          
+          // Show error message
+          const errorMsg = error?.message || "فشل في حجز الطاولة. حاول مرة أخرى.";
+          alert(errorMsg);
         },
       });
       return;
