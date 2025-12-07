@@ -29,7 +29,7 @@ const AuthCallback = () => {
                   user: user,
                   message: message || "Authentication successful",
                 },
-                window.location.origin
+                "https://restaurant-booking-system-3.onrender.com"
               );
 
               // Close this popup window
