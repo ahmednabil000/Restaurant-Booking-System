@@ -29,7 +29,7 @@ app.use(
     credentials: true, // Allow credentials (cookies, sessions)
   })
 );
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images
 app.use(
   cookieSession({
     maxAge: 24 * 60 * 60 * 1000,
@@ -54,7 +54,6 @@ app.use(function (req, res, next) {
   next();
 });
 app.use(express.static(__dirname)); // Serve static files for testing
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
