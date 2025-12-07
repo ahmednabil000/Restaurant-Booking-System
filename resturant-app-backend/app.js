@@ -25,7 +25,7 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.CLIENT_URL, // Your frontend URL
+    origin: "https://restaurant-booking-system-3.onrender.com", // Your frontend URL
     credentials: true, // Allow credentials (cookies, sessions)
   })
 );
