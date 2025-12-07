@@ -3,7 +3,7 @@ const passport = require("passport");
 const { v4: uuidv4 } = require("uuid");
 const User = require("./models/user");
 
-const GOOGLE_CALLBACK_URL = "http://localhost:8080/auth/google/callback";
+const GOOGLE_CALLBACK_URL = "https://restaurant-booking-system-p6kp.onrender.com/auth/google/callback";
 
 passport.use(
   new googleStrategy(
