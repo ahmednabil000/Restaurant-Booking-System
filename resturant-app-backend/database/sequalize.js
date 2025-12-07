@@ -1,9 +1,10 @@
 const { Sequelize } = require("sequelize");
+require('dotenv').config();
 
-const sequelize = new Sequelize("resturant", "postgres", "ahmed3500", {
-  host: "localhost",
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
   logging: false, // Disable all SQL logging
+ 
 });
 
 module.exports = sequelize;
