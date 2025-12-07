@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter } from "react-router";
-import { HashRouter, RouterProvider } from "react-router-dom";
+import { RouterProvider } from "react-router/dom";
 import Home from "./pages/Home.jsx";
 import MainLayout from "./ui/Layouts/MainLayout.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
@@ -39,75 +39,184 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "./pages/CheckoutForm.jsx";
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: "about-us", element: <AboutUs /> },
+      { path: "menu", element: <Menu /> },
+      { path: "contact-us", element: <ContactUs /> },
+      {
+        path: "reserve",
+        element: (
+          <ProtectedRoute>
+            <TableBooking />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "cart",
+        element: (
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: "login",
+    element: <Login />,
+  },
+  {
+    path: "success-payment",
+    element: <SuccessPayment />,
+  },
+  {
+    path: "cancel-payment",
+    element: <CancelPayment />,
+  },
+  {
+    path: "login/success",
+    element: <LoginSuccess />,
+  },
+  {
+    path: "login/error",
+    element: <LoginError />,
+  },
+  {
+    path: "unauthorized",
+    element: <Unauthorized />,
+  },
+  {
+    path: "checkout-form",
+    element: <CheckoutForm />,
+  },
+  // Admin-protected dashboard routes
+  {
+    path: "dashboard",
+    element: (
+      <AdminProtectedRoute>
+        <Overview />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/overview",
+    element: (
+      <AdminProtectedRoute>
+        <Overview />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/menu-management",
+    element: (
+      <AdminProtectedRoute>
+        <MenuManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/working-days",
+    element: (
+      <AdminProtectedRoute>
+        <WorkingDaysManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/restaurant-management",
+    element: (
+      <AdminProtectedRoute>
+        <RestaurantManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/branches",
+    element: (
+      <AdminProtectedRoute>
+        <BranchesManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/reservations",
+    element: (
+      <AdminProtectedRoute>
+        <ReservationsManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/customers",
+    element: (
+      <AdminProtectedRoute>
+        <Customers />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/employees-management",
+    element: (
+      <AdminProtectedRoute>
+        <EmployeesManagement />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/reviews",
+    element: (
+      <AdminProtectedRoute>
+        <Reviews />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/messages",
+    element: (
+      <AdminProtectedRoute>
+        <Messages />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/reports",
+    element: (
+      <AdminProtectedRoute>
+        <Reports />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/profit-loss",
+    element: (
+      <AdminProtectedRoute>
+        <ProfitLoss />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: "dashboard/settings",
+    element: (
+      <AdminProtectedRoute>
+        <Settings />
+      </AdminProtectedRoute>
+    ),
+  },
+]);
 const stripePromise = loadStripe(
   "pk_test_51Sb7C7IIwlX9F94VJubdxctW02SPrvJo7f5IgqOkbt2RNqN3SKmGzt1upBLA3QBCc4Z0Nac5Jca9qgrM2iybGbIb00dIiYV6qm"
 ); // Your publishable key
 
 createRoot(document.getElementById("root")).render(
- <StrictMode>
+  <StrictMode>
     <Elements stripe={stripePromise}>
       <QueryProvider>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<Home />} />
-              <Route path="about-us" element={<AboutUs />} />
-              <Route path="menu" element={<Menu />} />
-              <Route path="contact-us" element={<ContactUs />} />
-              <Route
-                path="reserve"
-                element={
-                  <ProtectedRoute>
-                    <TableBooking />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="cart"
-                element={
-                  <ProtectedRoute>
-                    <Cart />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
-
-            <Route path="login" element={<Login />} />
-            <Route path="success-payment" element={<SuccessPayment />} />
-            <Route path="cancel-payment" element={<CancelPayment />} />
-            <Route path="login/success" element={<LoginSuccess />} />
-            <Route path="login/error" element={<LoginError />} />
-            <Route path="unauthorized" element={<Unauthorized />} />
-            <Route path="checkout-form" element={<CheckoutForm />} />
-
-            {/* Admin routes */}
-            <Route
-              path="dashboard"
-              element={
-                <AdminProtectedRoute>
-                  <Overview />
-                </AdminProtectedRoute>
-              }
-            />
-            <Route
-              path="dashboard/overview"
-              element={
-                <AdminProtectedRoute>
-                  <Overview />
-                </AdminProtectedRoute>
-              }
-            />
-            <Route
-              path="dashboard/menu-management"
-              element={
-                <AdminProtectedRoute>
-                  <MenuManagement />
-                </AdminProtectedRoute>
-              }
-            />
-            {/* Add the rest of your admin routes similarly */}
-          </Routes>
-        </HashRouter>
+        <RouterProvider router={router} />
       </QueryProvider>
     </Elements>
   </StrictMode>
