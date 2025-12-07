@@ -1,6 +1,5 @@
 // Global API configuration
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080";
+export const API_BASE_URL ="https://restaurant-booking-system-p6kp.onrender.com";
 
 // API endpoints helper
 export const createApiUrl = (endpoint) => {
