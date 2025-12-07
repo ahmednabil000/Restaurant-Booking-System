@@ -52,13 +52,7 @@ const Employee = sequelize.define(
         isBefore: new Date().toISOString().split("T")[0],
       },
     },
-    imageUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      validate: {
-        isUrl: true,
-      },
-    },
+
     email: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -87,6 +81,13 @@ const Employee = sequelize.define(
       defaultValue: DataTypes.NOW,
       validate: {
         isDate: true,
+      },
+    },
+    imageUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        isUrl: true,
       },
     },
     isActive: {

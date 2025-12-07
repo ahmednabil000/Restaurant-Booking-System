@@ -11,10 +11,6 @@ const Reservation = sequelize.define("Reservation", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   phone: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -47,6 +43,10 @@ const Reservation = sequelize.define("Reservation", {
     ),
     defaultValue: "pending",
   },
+  // paymentMethod: {
+  //   type: DataTypes.ENUM("cash", "card"),
+  //   allowNull: false,
+  // },
   specialRequests: {
     type: DataTypes.TEXT,
     allowNull: true,

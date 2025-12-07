@@ -78,8 +78,9 @@ const Resturant = sequelize.define(
       },
     },
     serviceFees: {
-      type: DataTypes.DECIMAL,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      defaultValue: 0,
     },
     facebookUrl: {
       type: DataTypes.STRING,

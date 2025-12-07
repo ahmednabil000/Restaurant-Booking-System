@@ -13,6 +13,7 @@ const {
   sendReservationPendingEmail,
   sendReservationConfirmationEmail,
 } = require("../utils/emailService");
+const { recalculateCartTotal } = require("./cart");
 
 // Reserve a table
 exports.reserveTable = async (req, res) => {
@@ -37,6 +38,32 @@ exports.reserveTable = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    // Check if user has items in cart - reservation requires at least one item
+    const activeCart = await Cart.findOne({
+      where: {
+        userId: userId,
+        status: "active",
+      },
+      include: [
+        {
+          model: CartItem,
+          as: "cartItems",
+        },
+      ],
+    });
+
+    if (
+      !activeCart ||
+      !activeCart.cartItems ||
+      activeCart.cartItems.length === 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cannot make a reservation with an empty cart. Please add items to your cart before reserving a table.",
       });
     }
 
@@ -121,10 +148,11 @@ exports.reserveTable = async (req, res) => {
     const assignedTableNumber =
       tableNumber || `T${(reservedTables + 1).toString().padStart(2, "0")}`;
 
-    // Create reservation
+    // Create reservation with cart association
     const newReservation = await Reservation.create({
       id: uuidv4(),
       userId: userId,
+      cartId: activeCart.id, // Link the cart to the reservation
       fullName,
       email: user.email, // Add user email to reservation
       phone,
@@ -137,19 +165,30 @@ exports.reserveTable = async (req, res) => {
       status: "confirmed", // Directly confirmed for authenticated users
     });
 
-    // Mark user's active cart as completed
+    // Update cart status to indicate it's associated with a reservation
+    // Keep cart items intact for future reference and revenue tracking
+    let newActiveCart = null;
     try {
-      const activeCart = await Cart.findOne({
-        where: {
+      if (activeCart) {
+        // Mark cart as completed but preserve all cart items
+        await activeCart.update({
+          status: "completed", // Mark as completed for revenue tracking
+        });
+
+        console.log(
+          `Cart ${activeCart.id} marked as completed (items preserved) for reservation ${newReservation.id}`
+        );
+
+        // Create a new active cart for the user to continue shopping
+        newActiveCart = await Cart.create({
+          id: uuidv4(),
           userId: userId,
           status: "active",
-        },
-      });
+          totalAmount: 0.0,
+        });
 
-      if (activeCart) {
-        await activeCart.update({ status: "completed" });
         console.log(
-          `Cart ${activeCart.id} marked as completed for user ${userId}`
+          `New active cart ${newActiveCart.id} created for user ${userId}`
         );
       }
     } catch (cartError) {
@@ -169,6 +208,12 @@ exports.reserveTable = async (req, res) => {
     res.status(201).json({
       success: true,
       data: newReservation,
+      cart: {
+        id: newActiveCart?.id || null,
+        totalAmount: 0,
+        itemCount: 0,
+        items: [],
+      },
       message:
         "Reservation created and confirmed successfully! Check your email for confirmation details.",
     });
@@ -548,6 +593,32 @@ exports.getAllReservations = async (req, res) => {
               : undefined,
           required: false, // LEFT JOIN to include reservations even if user is null
         },
+        {
+          model: Cart,
+          as: "cart",
+          attributes: ["id", "totalAmount", "status"],
+          required: false,
+          include: [
+            {
+              model: CartItem,
+              as: "cartItems",
+              attributes: [
+                "id",
+                "quantity",
+                "unitPrice",
+                "totalPrice",
+                "specialInstructions",
+              ],
+              include: [
+                {
+                  model: Meal,
+                  as: "meal",
+                  attributes: ["id", "title", "price", "imageUrl", "category"],
+                },
+              ],
+            },
+          ],
+        },
       ],
       limit: parseInt(limit),
       offset: parseInt(offset),
@@ -557,10 +628,36 @@ exports.getAllReservations = async (req, res) => {
       ],
     });
 
+    // Get restaurant service fees
+    const restaurant = await Resturant.findOne();
+    const serviceFees =
+      restaurant && restaurant.serviceFees != null
+        ? parseFloat(restaurant.serviceFees)
+        : 0;
+
+    // Add itemsTotal and serviceFees breakdown to each reservation's cart
+    const reservationsWithBreakdown = reservations.map((reservation) => {
+      const reservationData = reservation.toJSON();
+
+      if (reservationData.cart && reservationData.cart.cartItems) {
+        const itemsTotal = reservationData.cart.cartItems.reduce(
+          (total, item) => {
+            return total + parseFloat(item.totalPrice || 0);
+          },
+          0
+        );
+
+        reservationData.cart.itemsTotal = itemsTotal.toFixed(2);
+        reservationData.cart.serviceFees = serviceFees.toFixed(2);
+      }
+
+      return reservationData;
+    });
+
     res.status(200).json({
       success: true,
       data: {
-        reservations,
+        reservations: reservationsWithBreakdown,
         pagination: {
           total: count,
           page: parseInt(page),
@@ -592,6 +689,39 @@ exports.getReservationById = async (req, res) => {
           as: "user",
           attributes: ["id", "fullName", "email"],
         },
+        {
+          model: Cart,
+          as: "cart",
+          attributes: ["id", "totalAmount", "status", "createdAt", "updatedAt"],
+          required: false,
+          include: [
+            {
+              model: CartItem,
+              as: "cartItems",
+              attributes: [
+                "id",
+                "quantity",
+                "unitPrice",
+                "totalPrice",
+                "specialInstructions",
+              ],
+              include: [
+                {
+                  model: Meal,
+                  as: "meal",
+                  attributes: [
+                    "id",
+                    "title",
+                    "description",
+                    "price",
+                    "imageUrl",
+                    "category",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
@@ -602,9 +732,30 @@ exports.getReservationById = async (req, res) => {
       });
     }
 
+    // Get restaurant service fees and add breakdown
+    const restaurant = await Resturant.findOne();
+    const serviceFees =
+      restaurant && restaurant.serviceFees != null
+        ? parseFloat(restaurant.serviceFees)
+        : 0;
+
+    const reservationData = reservation.toJSON();
+
+    if (reservationData.cart && reservationData.cart.cartItems) {
+      const itemsTotal = reservationData.cart.cartItems.reduce(
+        (total, item) => {
+          return total + parseFloat(item.totalPrice || 0);
+        },
+        0
+      );
+
+      reservationData.cart.itemsTotal = itemsTotal.toFixed(2);
+      reservationData.cart.serviceFees = serviceFees.toFixed(2);
+    }
+
     res.status(200).json({
       success: true,
-      data: reservation,
+      data: reservationData,
       message: "Reservation retrieved successfully",
     });
   } catch (error) {
@@ -699,7 +850,20 @@ exports.completeReservation = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const reservation = await Reservation.findByPk(id);
+    const reservation = await Reservation.findByPk(id, {
+      include: [
+        {
+          model: Cart,
+          as: "cart",
+          include: [
+            {
+              model: CartItem,
+              as: "cartItems",
+            },
+          ],
+        },
+      ],
+    });
 
     if (!reservation) {
       return res.status(404).json({
@@ -715,14 +879,35 @@ exports.completeReservation = async (req, res) => {
       });
     }
 
+    // Update reservation status
     const updatedReservation = await reservation.update({
       status: "completed",
     });
 
+    // If reservation has an associated cart, mark it as completed and update total
+    if (reservation.cart) {
+      // Recalculate and update cart total to ensure accuracy
+      const totalAmount = await recalculateCartTotal(reservation.cart.id);
+
+      // Update cart status to completed (total amount already updated by helper function)
+      await Cart.update(
+        {
+          status: "completed",
+        },
+        {
+          where: { id: reservation.cart.id },
+        }
+      );
+
+      console.log(
+        `Cart ${reservation.cart.id} marked as completed with total amount: ${totalAmount}`
+      );
+    }
+
     res.status(200).json({
       success: true,
       data: updatedReservation,
-      message: "Reservation marked as completed",
+      message: "Reservation and associated cart marked as completed",
     });
   } catch (error) {
     console.error("Error completing reservation:", error);
@@ -1190,7 +1375,7 @@ exports.getMostDemandedMeals = async (req, res) => {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    // Get most ordered meals from completed carts associated with reservations
+    // Get most ordered meals from completed carts
     const mostDemandedMeals = await CartItem.findAll({
       include: [
         {
@@ -1203,27 +1388,25 @@ exports.getMostDemandedMeals = async (req, res) => {
             },
           },
           attributes: [], // Don't select cart fields to avoid GROUP BY issues
-          include: [
-            {
-              model: Reservation,
-              as: "reservation",
-              where: {
-                status: { [Op.in]: ["completed", "confirmed"] },
-              },
-              attributes: [], // Don't select reservation fields to avoid GROUP BY issues
-            },
-          ],
         },
         {
           model: Meal,
           as: "meal",
-          attributes: ["id", "title", "price", "description", "imageUrl"],
+          attributes: [
+            "id",
+            "title",
+            "price",
+            "description",
+            "imageUrl",
+            "category",
+          ],
         },
       ],
       attributes: [
         "mealId",
         [fn("SUM", col("quantity")), "totalOrdered"],
         [fn("COUNT", col("CartItem.id")), "orderCount"],
+        [fn("SUM", col("totalPrice")), "totalRevenue"],
       ],
       group: [
         "mealId",
@@ -1232,29 +1415,32 @@ exports.getMostDemandedMeals = async (req, res) => {
         "meal.price",
         "meal.description",
         "meal.imageUrl",
+        "meal.category",
       ],
       order: [[fn("SUM", col("quantity")), "DESC"]],
       limit: parseInt(limit),
     });
 
-    // Also get total revenue per meal
-    const mealsWithRevenue = await Promise.all(
-      mostDemandedMeals.map(async (item) => {
-        const totalRevenue =
-          parseFloat(item.dataValues.totalOrdered) *
-          parseFloat(item.meal.price);
-        return {
-          meal: item.meal,
-          totalOrdered: parseInt(item.dataValues.totalOrdered),
-          orderCount: parseInt(item.dataValues.orderCount),
-          totalRevenue: totalRevenue.toFixed(2),
-          averageOrderSize: (
-            parseInt(item.dataValues.totalOrdered) /
-            parseInt(item.dataValues.orderCount)
-          ).toFixed(1),
-        };
-      })
-    );
+    // Format the response with revenue and average order size
+    const mealsWithRevenue = mostDemandedMeals.map((item) => {
+      return {
+        meal: {
+          id: item.meal.id,
+          title: item.meal.title,
+          price: parseFloat(item.meal.price),
+          description: item.meal.description,
+          imageUrl: item.meal.imageUrl,
+          category: item.meal.category,
+        },
+        totalOrdered: parseInt(item.dataValues.totalOrdered),
+        orderCount: parseInt(item.dataValues.orderCount),
+        totalRevenue: parseFloat(item.dataValues.totalRevenue || 0).toFixed(2),
+        averageOrderSize: (
+          parseInt(item.dataValues.totalOrdered) /
+          parseInt(item.dataValues.orderCount)
+        ).toFixed(1),
+      };
+    });
 
     res.status(200).json({
       success: true,

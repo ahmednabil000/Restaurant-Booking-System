@@ -1,5 +1,8 @@
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { useCartQuery } from "../hooks/useCart";
+import { showErrorNotification } from "../utils/notifications";
 
 /**
  * Example component demonstrating authentication usage
@@ -16,6 +19,29 @@ const AuthExample = () => {
     canAccess,
     logout,
   } = useAuth();
+  const navigate = useNavigate();
+  const { data: cartResponse } = useCartQuery();
+
+  // Extract cart data
+  const cartData = cartResponse?.success ? cartResponse.cart : null;
+  const cartItems = cartData?.items || [];
+  const isCartEmpty = cartItems.length === 0;
+
+  const handleReservationClick = (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (isCartEmpty) {
+      showErrorNotification("يجب إضافة وجبات للسلة أولاً لتتمكن من حجز طاولة");
+      return;
+    }
+
+    navigate("/reserve");
+  };
 
   if (!isAuthenticated) {
     return (
@@ -74,12 +100,12 @@ const AuthExample = () => {
               >
                 السلة
               </Link>
-              <Link
-                to="/reserve"
+              <button
+                onClick={handleReservationClick}
                 className="block bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
               >
                 حجز طاولة
-              </Link>
+              </button>
             </div>
           </div>
         )}

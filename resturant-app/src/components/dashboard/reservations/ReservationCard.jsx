@@ -137,10 +137,89 @@ const ReservationCard = ({
         </div>
       )}
 
+      {/* Cart Summary */}
+      {reservation.cart &&
+        reservation.cart.cartItems &&
+        reservation.cart.cartItems.length > 0 && (
+          <div className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-gray-700">
+                تفاصيل الطلب:
+              </span>
+              <span className="text-xs text-gray-600">
+                {reservation.cart.cartItems.length} صنف
+              </span>
+            </div>
+            <div className="space-y-1 max-h-24 overflow-y-auto">
+              {reservation.cart.cartItems.slice(0, 3).map((item, index) => (
+                <div
+                  key={item.id || index}
+                  className="text-xs text-gray-700 flex justify-between"
+                >
+                  <span>
+                    {item.quantity}× {item.meal?.title || "وجبة"}
+                  </span>
+                  <span className="font-medium">{item.totalPrice} ج.م</span>
+                </div>
+              ))}
+              {reservation.cart.cartItems.length > 3 && (
+                <div className="text-xs text-gray-500 italic">
+                  و {reservation.cart.cartItems.length - 3} أصناف أخرى...
+                </div>
+              )}
+            </div>
+            <div className="border-t border-orange-300 mt-2 pt-2 space-y-1">
+              {reservation.cart.itemsTotal !== undefined && (
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-600">مجموع الأصناف:</span>
+                  <span className="font-medium text-gray-700">
+                    {parseFloat(reservation.cart.itemsTotal).toFixed(2)} ج.م
+                  </span>
+                </div>
+              )}
+              {reservation.cart.serviceFees !== undefined && (
+                <div className="flex justify-between items-center text-xs bg-blue-50 px-2 py-1 rounded">
+                  <span className="text-gray-700 font-semibold">
+                    رسوم الخدمة:
+                  </span>
+                  <span className="font-bold text-blue-600">
+                    {parseFloat(reservation.cart.serviceFees).toFixed(2)} ج.م
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-1 border-t border-orange-200">
+                <span className="text-sm font-bold text-gray-800">
+                  الإجمالي:
+                </span>
+                <span className="text-sm font-bold text-[#e26136]">
+                  {parseFloat(reservation.cart.totalAmount).toFixed(2)} ج.م
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {/* Payment Method Badge */}
+      {reservation.paymentMethod && (
+        <div className="mb-3">
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+              reservation.paymentMethod === "card"
+                ? "bg-blue-100 text-blue-800"
+                : "bg-green-100 text-green-800"
+            }`}
+          >
+            {reservation.paymentMethod === "card" ? "💳 بطاقة" : "💵 نقداً"}
+          </span>
+        </div>
+      )}
+
+     
+
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs text-gray-500">
           تم الإنشاء:{" "}
-          {new Date(reservation.createdAt).toLocaleDateString("ar-SA")}
+          {new Date(reservation.createdAt).toLocaleDateString("en-GB")}
         </div>
 
         <div className="flex items-center gap-1">

@@ -30,20 +30,17 @@ const Home = () => {
                 rating={5}
                 comment="طعام رائع وخدمة ممتازة! أنصح بشدة بزيارة هذا المطعم المميز"
                 name="أحمد محمد"
-                avatar="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
               />
               <Testimonial
                 rating={4}
                 comment="تجربة طعام لا تُنسى مع أجواء رائعة ومذاق أصيل"
                 name="فاطمة علي"
-                avatar="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face"
               />
               <div className="hidden lg:block">
                 <Testimonial
                   rating={5}
                   comment="جودة عالية وأسعار معقولة، سأعود بالتأكيد مرة أخرى"
                   name="محمد الأحمد"
-                  avatar="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
                 />
               </div>
             </div>

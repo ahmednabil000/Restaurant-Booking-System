@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineShoppingCart, AiOutlineArrowRight } from "react-icons/ai";
 import useAuthStore from "../store/authStore";
 import useRestaurantStore from "../store/restaurantStore";
@@ -13,6 +13,7 @@ const Cart = () => {
   const { restaurant, fetchRestaurantDetails } = useRestaurantStore();
   const { data: cartResponse, isLoading, error } = useCartQuery();
   const clearCartMutation = useClearCartMutation();
+  const navigate = useNavigate();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Fetch restaurant details if not already loaded
@@ -180,8 +181,11 @@ const Cart = () => {
               </div>
 
               {/* Checkout Button */}
-              <button className="w-full bg-[#e26136] text-white py-3 rounded-lg font-semibold hover:bg-[#cd4f25] transition-colors duration-200 mb-4">
-                إتمام الطلب
+              <button
+                onClick={() => navigate("/reserve")}
+                className="w-full bg-[#e26136] text-white py-3 rounded-lg font-semibold hover:bg-[#cd4f25] transition-colors duration-200 mb-4"
+              >
+                احجز الآن
               </button>
 
               {/* Continue Shopping */}
@@ -189,7 +193,7 @@ const Cart = () => {
                 to="/menu"
                 className="block text-center text-[#e26136] font-medium hover:text-[#cd4f25] transition-colors duration-200"
               >
-                متابعة التسوق
+                متابعة الاختيار
               </Link>
             </div>
           </div>

@@ -26,12 +26,19 @@ import Messages from "./pages/dashboard/Messages.jsx";
 import Reports from "./pages/dashboard/Reports.jsx";
 import Settings from "./pages/dashboard/Settings.jsx";
 import RestaurantManagement from "./pages/dashboard/RestaurantManagement.jsx";
-import UsersManagement from "./pages/dashboard/UsersManagement.jsx";
+import EmployeesManagement from "./pages/dashboard/EmployeesManagement.jsx";
+import ProfitLoss from "./pages/dashboard/ProfitLoss.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
 
 // Import protection components
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
+import SuccessPayment from "./pages/SuccessPayment.jsx";
+import CancelPayment from "./pages/CancelPayment.jsx";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import CheckoutForm from "./pages/CheckoutForm.jsx";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -64,6 +71,14 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
+    path: "success-payment",
+    element: <SuccessPayment />,
+  },
+  {
+    path: "cancel-payment",
+    element: <CancelPayment />,
+  },
+  {
     path: "login/success",
     element: <LoginSuccess />,
   },
@@ -74,6 +89,10 @@ const router = createBrowserRouter([
   {
     path: "unauthorized",
     element: <Unauthorized />,
+  },
+  {
+    path: "checkout-form",
+    element: <CheckoutForm />,
   },
   // Admin-protected dashboard routes
   {
@@ -141,10 +160,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "dashboard/users-management",
+    path: "dashboard/employees-management",
     element: (
       <AdminProtectedRoute>
-        <UsersManagement />
+        <EmployeesManagement />
       </AdminProtectedRoute>
     ),
   },
@@ -173,6 +192,14 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: "dashboard/profit-loss",
+    element: (
+      <AdminProtectedRoute>
+        <ProfitLoss />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
     path: "dashboard/settings",
     element: (
       <AdminProtectedRoute>
@@ -181,11 +208,16 @@ const router = createBrowserRouter([
     ),
   },
 ]);
+const stripePromise = loadStripe(
+  "pk_test_51Sb7C7IIwlX9F94VJubdxctW02SPrvJo7f5IgqOkbt2RNqN3SKmGzt1upBLA3QBCc4Z0Nac5Jca9qgrM2iybGbIb00dIiYV6qm"
+); // Your publishable key
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <QueryProvider>
-      <RouterProvider router={router} />
-    </QueryProvider>
+    <Elements stripe={stripePromise}>
+      <QueryProvider>
+        <RouterProvider router={router} />
+      </QueryProvider>
+    </Elements>
   </StrictMode>
 );

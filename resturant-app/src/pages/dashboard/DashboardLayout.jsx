@@ -7,6 +7,7 @@ import {
   FaUsers,
   FaStar,
   FaChartBar,
+  FaChartLine,
   FaCog,
   FaSignOutAlt,
   FaBars,
@@ -61,9 +62,9 @@ const DashboardLayout = ({ children }) => {
       path: "/dashboard/customers",
     },
     {
-      title: "إدارة المستخدمين",
+      title: "إدارة الموظفين",
       icon: FaUserShield,
-      path: "/dashboard/users-management",
+      path: "/dashboard/employees-management",
     },
     {
       title: "التقييمات",
@@ -79,6 +80,11 @@ const DashboardLayout = ({ children }) => {
       title: "التقارير",
       icon: FaChartBar,
       path: "/dashboard/reports",
+    },
+    {
+      title: "الأرباح والخسائر",
+      icon: FaChartLine,
+      path: "/dashboard/profit-loss",
     },
     {
       title: "الإعدادات",

@@ -123,6 +123,7 @@ export const reserveTable = async (reservationData) => {
       endTime: reservationData.endTime,
       notes: reservationData.notes || "",
       tableNumber: reservationData.tableNumber,
+      paymentMethod: reservationData.paymentMethod || "cash", // "cash" or "card"
     };
 
     const response = await fetch(`${API_BASE_URL}/reservations`, {

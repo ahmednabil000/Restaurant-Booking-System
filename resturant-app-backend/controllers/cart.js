@@ -2,7 +2,27 @@ const { UUIDV4 } = require("sequelize");
 const Cart = require("../models/cart");
 const CartItem = require("../models/cartItem");
 const Meal = require("../models/meal");
+const Resturant = require("../models/resturant");
 const { v4: uuidv4 } = require("uuid");
+
+// Helper function to get service fees
+const getServiceFees = async () => {
+  try {
+    const restaurant = await Resturant.findOne();
+    if (!restaurant) {
+      console.log("No restaurant found in database");
+      return 0;
+    }
+    if (restaurant.serviceFees == null) {
+      console.log("Restaurant serviceFees is null");
+      return 0;
+    }
+    return parseFloat(restaurant.serviceFees);
+  } catch (error) {
+    console.error("Error fetching service fees:", error);
+    return 0;
+  }
+};
 
 exports.addToCart = async (req, res) => {
   try {
@@ -88,14 +108,18 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    // Update cart total amount
+    // Update cart total amount including service fees
     const allCartItems = await CartItem.findAll({
       where: { cartId: cart.id },
     });
 
-    const newTotalAmount = allCartItems.reduce((total, item) => {
+    const itemsTotal = allCartItems.reduce((total, item) => {
       return total + parseFloat(item.totalPrice);
     }, 0);
+
+    // Get restaurant service fees
+    const serviceFees = await getServiceFees();
+    const newTotalAmount = itemsTotal + serviceFees;
 
     await cart.update({ totalAmount: newTotalAmount });
 
@@ -165,17 +189,28 @@ exports.getCart = async (req, res) => {
         message: "Cart is empty",
         cart: {
           items: [],
+          itemsTotal: 0,
+          serviceFees: 0,
           totalAmount: 0,
           itemCount: 0,
         },
       });
     }
 
+    // Calculate items total and get service fees
+    const itemsTotal = cart.cartItems.reduce((total, item) => {
+      return total + parseFloat(item.totalPrice);
+    }, 0);
+
+    const serviceFees = await getServiceFees();
+
     res.status(200).json({
       success: true,
       message: "Cart retrieved successfully",
       cart: {
         id: cart.id,
+        itemsTotal,
+        serviceFees,
         totalAmount: cart.totalAmount,
         itemCount: cart.cartItems.length,
         items: cart.cartItems.map((item) => ({
@@ -229,14 +264,18 @@ exports.removeFromCart = async (req, res) => {
     // Remove the cart item
     await cartItem.destroy();
 
-    // Recalculate cart total
+    // Recalculate cart total with service fees
     const remainingItems = await CartItem.findAll({
       where: { cartId: cart.id },
     });
 
-    const newTotalAmount = remainingItems.reduce((total, item) => {
+    const itemsTotal = remainingItems.reduce((total, item) => {
       return total + parseFloat(item.totalPrice);
     }, 0);
+
+    // Get service fees from restaurant
+    const serviceFees = await getServiceFees();
+    const newTotalAmount = itemsTotal + serviceFees;
 
     await cart.update({ totalAmount: newTotalAmount });
 
@@ -245,6 +284,8 @@ exports.removeFromCart = async (req, res) => {
       message: "Item removed from cart successfully",
       cart: {
         id: cart.id,
+        itemsTotal,
+        serviceFees,
         totalAmount: newTotalAmount,
         itemCount: remainingItems.length,
       },
@@ -301,14 +342,18 @@ exports.updateItemQuantity = async (req, res) => {
     cartItem.totalPrice = quantity * cartItem.unitPrice;
     await cartItem.save();
 
-    // Recalculate cart total
-    const allCartItems = await CartItem.findAll({
+    // Recalculate cart total including service fees
+    const updatedCartItems = await CartItem.findAll({
       where: { cartId: cart.id },
     });
 
-    const newTotalAmount = allCartItems.reduce((total, item) => {
+    const itemsTotal = updatedCartItems.reduce((total, item) => {
       return total + parseFloat(item.totalPrice);
     }, 0);
+
+    // Get restaurant service fees
+    const serviceFees = await getServiceFees();
+    const newTotalAmount = itemsTotal + serviceFees;
 
     await cart.update({ totalAmount: newTotalAmount });
 
@@ -381,5 +426,63 @@ exports.clearCart = async (req, res) => {
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+// Utility function to check if user's cart is empty
+exports.isCartEmpty = async (userId) => {
+  try {
+    const cart = await Cart.findOne({
+      where: {
+        userId: userId,
+        status: "active",
+      },
+      include: [
+        {
+          model: CartItem,
+          as: "cartItems",
+        },
+      ],
+    });
+
+    return !cart || !cart.cartItems || cart.cartItems.length === 0;
+  } catch (error) {
+    console.error("Error checking if cart is empty:", error);
+    throw error;
+  }
+};
+
+// Helper function to recalculate and update cart total
+exports.recalculateCartTotal = async (cartId) => {
+  try {
+    const cart = await Cart.findByPk(cartId, {
+      include: [
+        {
+          model: CartItem,
+          as: "cartItems",
+        },
+      ],
+    });
+
+    if (!cart) {
+      throw new Error("Cart not found");
+    }
+
+    // Calculate total from cart items
+    const itemsTotal = cart.cartItems.reduce((sum, item) => {
+      return sum + parseFloat(item.totalPrice || 0);
+    }, 0);
+
+    // Get restaurant service fees
+    const serviceFees = await getServiceFees();
+    const totalAmount = itemsTotal + serviceFees;
+
+    // Update cart total
+    await cart.update({ totalAmount: totalAmount });
+
+    return totalAmount;
+  } catch (error) {
+    console.error("Error recalculating cart total:", error);
+    throw error;
   }
 };

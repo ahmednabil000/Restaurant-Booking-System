@@ -50,8 +50,8 @@ router.get(
 // Admin routes for reservation management
 router.get(
   "/reservations",
-  authMiddleware.authenticateJWT,
-  authMiddleware.requireRole(["admin", "owner"]),
+  // authMiddleware.authenticateJWT,
+  // authMiddleware.requireRole(["admin", "owner"]),
   reservationController.getAllReservations
 );
 

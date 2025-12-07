@@ -16,8 +16,10 @@ const resturantRoutes = require("./routes/resturantRoutes");
 const tagsRoutes = require("./routes/tagsRoutes");
 const branchesRoutes = require("./routes/branchesRoutes");
 const usersRoutes = require("./routes/usersRoutes");
+const employeesRoutes = require("./routes/employeesRoutes");
+const profitLossRoutes = require("./routes/profitLossRoutes");
 const upload = require("./middlewares/multer");
-
+const paymentRoutes = require("./routes/payment");
 const app = express();
 
 // CORS configuration
@@ -58,6 +60,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(tagsRoutes);
+app.use(paymentRoutes);
 app.use("/auth", authRoutes);
 app.use(mealsRoutes);
 app.use(reservationRoutes);
@@ -65,6 +68,8 @@ app.use(resturantRoutes);
 app.use(cartRoutes);
 app.use(branchesRoutes);
 app.use("/api", usersRoutes);
+app.use(employeesRoutes);
+app.use("/profit-loss", profitLossRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({

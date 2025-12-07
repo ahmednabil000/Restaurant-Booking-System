@@ -8,6 +8,8 @@ import { getUserDisplayName } from "../utils/auth";
 import { getStoredToken, isAdmin } from "../utils/jwt";
 import LogoutConfirmation from "../components/LogoutConfirmation";
 import CartIcon from "../components/CartIcon";
+import { useCartQuery } from "../hooks/useCart";
+import { showErrorNotification } from "../utils/notifications";
 
 const Header = () => {
   const [selected, setSelected] = useState("home");
@@ -15,14 +17,36 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { user, logout, isAuthenticated } = useAuthStore();
+  const { data: cartResponse } = useCartQuery();
   const profileRef = useRef(null);
   const navigate = useNavigate();
+
+  // Extract cart data
+  const cartData = cartResponse?.success ? cartResponse.cart : null;
+  const cartItems = cartData?.items || [];
+  const isCartEmpty = cartItems.length === 0;
 
   // Check if current user is admin or owner
   const isUserAdminOrOwner = () => {
     if (!isAuthenticated || !user) return false;
     const token = getStoredToken();
     return token ? isAdmin(token) : false;
+  };
+
+  // Handle reservation button click with cart validation
+  const handleReservationClick = (e) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (isCartEmpty) {
+      e.preventDefault();
+      showErrorNotification("يجب إضافة وجبات للسلة أولاً لتتمكن من حجز طاولة");
+      return;
+    }
+
+    navigate("/reserve");
   };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -157,12 +181,12 @@ const Header = () => {
               </Link>
             )}
 
-            <Link
-              to={"/reserve"}
+            <button
+              onClick={handleReservationClick}
               className="text-white cursor-pointer bg-[#e26136] px-3 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 lg:px-5 lg:py-2.5 text-sm sm:text-base md:text-lg rounded-lg hover:bg-[#cd4f25] transition-colors duration-200 shadow-sm hover:shadow-md"
             >
               احجز طاولة
-            </Link>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
