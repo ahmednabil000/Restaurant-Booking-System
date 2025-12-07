@@ -7,7 +7,7 @@ const { route } = require("./mealsRoutes");
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-here";
 
 // Error redirect URL for failed authentication
-const errorLoginUrl = "http://localhost:3000/login/error";
+const errorLoginUrl = "https://restaurant-booking-system-p6kp.onrender.com/login/error";
 
 // Generate JWT token for authenticated user
 const generateToken = (user) => {
@@ -46,7 +46,7 @@ router.get(
       // Send token back to client (you have several options here)
 
       // Option 1: Redirect to frontend with token in URL params
-      res.redirect(`http://localhost:3000/login/success?token=${token}`);
+      res.redirect(`https://restaurant-booking-system-p6kp.onrender.com/login/success?token=${token}`);
 
       // Option 2: Send JSON response (uncomment if you want JSON response)
       // res.status(200).json({
