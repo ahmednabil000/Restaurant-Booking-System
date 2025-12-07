@@ -43,7 +43,7 @@ const AuthCallback = () => {
                   type: "GOOGLE_AUTH_ERROR",
                   message: "خطأ في معالجة بيانات المستخدم",
                 },
-                window.location.origin
+               "https://restaurant-booking-system-3.onrender.com"
               );
               window.close();
             }
@@ -57,7 +57,7 @@ const AuthCallback = () => {
                 type: "GOOGLE_AUTH_ERROR",
                 message: errorMessage,
               },
-              window.location.origin
+                "https://restaurant-booking-system-3.onrender.com"
             );
             window.close();
           }
@@ -70,7 +70,7 @@ const AuthCallback = () => {
               type: "GOOGLE_AUTH_ERROR",
               message: "حدث خطأ أثناء معالجة المصادقة",
             },
-            window.location.origin
+             "https://restaurant-booking-system-3.onrender.com"
           );
           window.close();
         }
